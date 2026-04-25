@@ -111,19 +111,84 @@ def get_fields(request):
 @csrf_exempt
 def get_field_updates(request):
     from fields.models import FieldUpdate
-    updates = FieldUpdate.objects.all().order_by('-created_at').values(
-        'id', 'field_id', 'stage', 'notes', 'created_at', 'agent_id'
-    )
-    return JsonResponse(list(updates), safe=False)
-
+    updates = FieldUpdate.objects.all().order_by('-created_at').select_related('agent')
+    
+    result = []
+    for update in updates:
+        result.append({
+            'id': update.id,
+            'field_id': update.field_id,
+            'stage': update.stage,
+            'notes': update.notes,
+            'created_at': str(update.created_at),
+            'agent_id': update.agent_id,
+            #'agent_name': update.agent.get_full_name() or update.agent.username if update.agent else 'Unknown', 
+            'agent_name': (update.agent.get_full_name() or update.agent.username) if update.agent else 'Unknown',
+        })
+    
+    return JsonResponse(result, safe=False)
 
 @csrf_exempt
 def get_agents(request):
-    agents = Profile.objects.filter(role='field_agent').values(
-        'id', 'full_name', 'role', 'user_id'
-    )
-    return JsonResponse(list(agents), safe=False)
+    profiles = Profile.objects.filter(role='field_agent').select_related('user')
 
+    result = []
+    for profile in profiles:
+        fields = profile.user.assigned_fields.values('id', 'name', 'crop_type')
+        result.append({
+            'id': profile.id,           # ✅ Profile id
+            'user_id': profile.user.id, # ✅ User id — this is what assigned_agent_id matches
+            'full_name': profile.full_name,
+            'email': profile.user.username,
+            'phone': profile.phone,
+            'residence': profile.residence,
+            'created_at': profile.user.date_joined.isoformat(),
+            'fields': list(fields),
+        })
+
+    return JsonResponse(result, safe=False)
+
+@csrf_exempt
+def register_agent(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    email = data.get("email")
+    password = data.get("password")
+    full_name = data.get("full_name", "")
+    phone = data.get("phone", "")
+    residence = data.get("residence", "")
+
+    if not email or not password:
+        return JsonResponse({"error": "Email and password required"}, status=400)
+
+    if User.objects.filter(username=email).exists():
+        return JsonResponse({"error": "Agent with this email already exists"}, status=400)
+
+    user = User.objects.create_user(username=email, password=password)
+    Profile.objects.create(
+        user=user,
+        full_name=full_name,
+        role='field_agent',
+        phone=phone,
+        residence=residence,
+    )
+
+    return JsonResponse({
+        "message": "Agent registered successfully",
+        "agent": {
+            "id": user.id,
+            "full_name": full_name,
+            "email": email,
+            "phone": phone,
+            "residence": residence,
+        }
+    }, status=201)
 
 @csrf_exempt
 def get_field_detail(request, id):
@@ -206,3 +271,89 @@ def create_field(request):
             "assigned_agent_id": field.assigned_agent_id,
         }
     }, status=201)
+@csrf_exempt
+def assign_field(request, id):  
+    if request.method != "POST":  
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    agent_id = data.get("agent_id")
+
+    from fields.models import Field
+    try:
+        field = Field.objects.get(id=id)
+        if agent_id:
+            field.assigned_agent_id = int(agent_id)  
+        else:
+            field.assigned_agent = None
+        field.save()
+
+        return JsonResponse({
+            "message": "Field assigned successfully",
+            "field_id": field.id,
+            "assigned_agent_id": field.assigned_agent_id
+        })
+
+    except Field.DoesNotExist:
+        return JsonResponse({"error": "Field not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+@csrf_exempt
+def delete_field(request, id):
+    if request.method != "DELETE":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    from fields.models import Field
+    try:
+        field = Field.objects.get(id=id)
+        field.delete()
+        return JsonResponse({"message": "Field deleted"})
+    except Field.DoesNotExist:
+        return JsonResponse({"error": "Field not found"}, status=404)
+
+@csrf_exempt
+def add_field_update(request, id):
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    stage = data.get("stage")
+    notes = data.get("notes", "")
+    agent_id = data.get("agent_id")
+
+    if not stage:
+        return JsonResponse({"error": "Stage is required"}, status=400)
+
+    from fields.models import Field, FieldUpdate
+    try:
+        field = Field.objects.get(id=id)
+        field.current_stage = stage
+        field.save()
+
+        update = FieldUpdate.objects.create(
+            field=field,
+            agent_id=agent_id,
+            stage=stage,
+            notes=notes
+        )
+
+        return JsonResponse({
+            "message": "Update saved",
+            "update": {
+                "id": update.id,
+                "field_id": update.field_id,
+                "stage": update.stage,
+                "notes": update.notes,
+                "created_at": str(update.created_at),
+            }
+        }, status=201)
+    except Field.DoesNotExist:
+        return JsonResponse({"error": "Field not found"}, status=404)

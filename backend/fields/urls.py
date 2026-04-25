@@ -13,5 +13,9 @@ urlpatterns = [
     path('fields/<int:id>/', views.get_field_detail, name='get_field_detail'),          
     path('fields/<int:id>/updates/', views.get_field_updates_by_id, name='field_updates'),  
     path('fields/<int:id>/agents/', views.get_field_agents, name='field_agents'),   
-    path('fields/create/', views.create_field, name='create_field'),    
+    path('fields/create/', views.create_field, name='create_field'),   
+    path("fields/<int:id>/assign/", views.assign_field, name="assign-field"), 
+    path('fields/<int:id>/delete/', views.delete_field, name='delete_field'),
+    path('fields/<int:id>/updates/add/', views.add_field_update, name='add_field_update'),
+    path('admin/register-agent/', views.register_agent, name='register_agent'),
 ]

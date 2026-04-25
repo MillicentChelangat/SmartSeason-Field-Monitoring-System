@@ -21,7 +21,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('dashboard');
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const [refreshKey, setRefreshKey] = useState(0);  // ✅ added
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -37,7 +37,11 @@ export default function App() {
 
   function navigate(target: string, fieldId?: string) {
     setPage(target as Page);
-    if (fieldId) setSelectedFieldId(fieldId);
+    if (fieldId) {
+      setSelectedFieldId(fieldId);
+    } else {
+      setRefreshKey(prev => prev + 1);  // ✅ increment on every navigation back
+    }
   }
 
   function handleLoginSuccess(u: any) {
@@ -72,7 +76,7 @@ export default function App() {
       return (
         <FieldDetailPage
           fieldId={selectedFieldId}
-          onBack={() => setPage(isAdmin ? 'fields' : 'my-fields')}
+          onBack={() => navigate(isAdmin ? 'fields' : 'my-fields')}  // ✅ use navigate not setPage
         />
       );
     }
@@ -80,19 +84,18 @@ export default function App() {
     if (isAdmin) {
       switch (page) {
         case 'fields':
-          return <FieldsPage onNavigate={navigate} />;
+          return <FieldsPage key={refreshKey} onNavigate={navigate} />;
         case 'agents':
-          return <AgentsPage />;
+          return <AgentsPage key={refreshKey} />;
         default:
-          return <AdminDashboard onNavigate={navigate} />;
+          return <AdminDashboard key={refreshKey} onNavigate={navigate} />;
       }
     } else {
       switch (page) {
         case 'my-fields':
-          return <MyFieldsPage onNavigate={navigate} />;
+          return <MyFieldsPage key={refreshKey} onNavigate={navigate} />;
         default:
-          // Pass onLogout down so AgentDashboard's sign-out button works
-          return <AgentDashboard onNavigate={navigate} onLogout={handleLogout} />;
+          return <AgentDashboard key={refreshKey} onNavigate={navigate} onLogout={handleLogout} />;
       }
     }
   }
@@ -102,7 +105,7 @@ export default function App() {
       <Navbar
         user={user}
         currentPage={page}
-        onNavigate={(target) => setPage(target as Page)}
+        onNavigate={(target) => navigate(target)}  // ✅ use navigate not setPage
         onLogout={handleLogout}
       />
       <main>{renderPage()}</main>

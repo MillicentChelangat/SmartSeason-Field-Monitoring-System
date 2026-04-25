@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { MapPin, CheckCircle2, AlertTriangle, Activity } from 'lucide-react';
-
 import API from '../api/api';
 import type { Field, FieldUpdate } from '../types/database';
 import { computeFieldStatus } from '../lib/fieldStatus';
@@ -15,7 +14,7 @@ interface FieldWithStatus extends Field {
 
 interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
-  onLogout: () => void;  
+  onLogout: () => void;
 }
 
 export function AgentDashboard({ onNavigate, onLogout }: Props) {
@@ -82,10 +81,30 @@ export function AgentDashboard({ onNavigate, onLogout }: Props) {
 
       {/* STATS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<MapPin className="h-5 w-5 text-green-700" />} label="My Fields" value={fields.length} bg="bg-green-50" />
-        <StatCard icon={<Activity className="h-5 w-5 text-blue-700" />} label="Active" value={active} bg="bg-blue-50" />
-        <StatCard icon={<AlertTriangle className="h-5 w-5 text-amber-600" />} label="At Risk" value={atRisk} bg="bg-amber-50" />
-        <StatCard icon={<CheckCircle2 className="h-5 w-5 text-slate-600" />} label="Completed" value={completed} bg="bg-slate-50" />
+        <StatCard
+          icon={<MapPin className="h-5 w-5 text-green-700" />}
+          label="My Fields"
+          value={fields.length}
+          bg="bg-green-50"
+        />
+        <StatCard
+          icon={<Activity className="h-5 w-5 text-blue-700" />}
+          label="Active"
+          value={active}
+          bg="bg-blue-50"
+        />
+        <StatCard
+          icon={<AlertTriangle className="h-5 w-5 text-amber-600" />}
+          label="At Risk"
+          value={atRisk}
+          bg="bg-amber-50"
+        />
+        <StatCard
+          icon={<CheckCircle2 className="h-5 w-5 text-slate-600" />}
+          label="Completed"
+          value={completed}
+          bg="bg-slate-50"
+        />
       </div>
 
       {/* EMPTY STATE */}
@@ -106,7 +125,7 @@ export function AgentDashboard({ onNavigate, onLogout }: Props) {
               {fields.slice(0, 6).map(field => (
                 <button
                   key={field.id}
-                  onClick={() => onNavigate('field-detail', field.id)}
+                  onClick={() => onNavigate('field-detail', String(field.id))}
                   className="w-full flex justify-between px-6 py-4 hover:bg-slate-50 text-left"
                 >
                   <div>
@@ -134,7 +153,8 @@ export function AgentDashboard({ onNavigate, onLogout }: Props) {
               recentUpdates.map(update => (
                 <div key={update.id} className="border-l-2 border-green-200 pl-3 mb-3">
                   <p className="text-sm font-medium">Field #{update.field_id}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-400 capitalize">{update.stage}</p>
+                  <p className="text-xs text-slate-400">
                     {new Date(update.created_at).toLocaleDateString()}
                   </p>
                 </div>

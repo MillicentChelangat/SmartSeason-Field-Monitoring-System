@@ -14,13 +14,18 @@ interface FieldWithStatus extends Field {
   assignedAgents: Profile[];
 }
 
+interface EnrichedUpdate extends FieldUpdate {
+  field_name: string;
+  agent_name: string;  
+}
+
 interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
 }
 
 export function AdminDashboard({ onNavigate }: Props) {
   const [fields, setFields] = useState<FieldWithStatus[]>([]);
-  const [recentUpdates, setRecentUpdates] = useState<FieldUpdate[]>([]);
+  const [recentUpdates, setRecentUpdates] = useState<EnrichedUpdate[]>([]);
   const [agentCount, setAgentCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -34,13 +39,12 @@ export function AdminDashboard({ onNavigate }: Props) {
         ]);
 
         const rawFields: Field[] = fieldsRes.data;
-        const allUpdates: FieldUpdate[] = updatesRes.data;
+        const allUpdates: any[] = updatesRes.data;  
         const agents: Profile[] = agentsRes.data;
 
         const enriched: FieldWithStatus[] = rawFields.map(field => {
           const fieldUpdates = allUpdates.filter(u => u.field_id === field.id);
           const lastUpdate = fieldUpdates[0] ?? null;
-
           return {
             ...field,
             status: computeFieldStatus(field, lastUpdate),
@@ -49,8 +53,19 @@ export function AdminDashboard({ onNavigate }: Props) {
           };
         });
 
+        // enrich updates with field name and agent name
+        const enrichedUpdates: EnrichedUpdate[] = allUpdates.map(update => {
+          const field = rawFields.find(f => f.id === update.field_id);
+          const agent = agents.find(a => a.user_id === update.agent_id);
+          return {
+            ...update,
+            field_name: field?.name ?? `Field #${update.field_id}`,
+            agent_name: update.agent_name ?? agent?.full_name ?? 'Unknown Agent',  
+          };
+        });
+
         setFields(enriched);
-        setRecentUpdates(allUpdates);
+        setRecentUpdates(enrichedUpdates);
         setAgentCount(agents.length);
 
       } catch (err) {
@@ -87,9 +102,7 @@ export function AdminDashboard({ onNavigate }: Props) {
 
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Overview Dashboard</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Monitor all fields and agent activity.
-        </p>
+        <p className="text-slate-500 text-sm mt-1">Monitor all fields and agent activity.</p>
       </div>
 
       {/* STATS */}
@@ -113,10 +126,13 @@ export function AdminDashboard({ onNavigate }: Props) {
           </div>
 
           <div className="divide-y divide-slate-100">
+            {fields.length === 0 && (
+              <div className="p-6 text-sm text-slate-400 text-center">No fields yet.</div>
+            )}
             {fields.slice(0, 6).map(field => (
               <button
                 key={field.id}
-                onClick={() => onNavigate('field-detail', field.id)}
+                onClick={() => onNavigate('field-detail', String(field.id))}
                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-slate-50 text-left"
               >
                 <div className="flex-1 min-w-0">
@@ -125,7 +141,6 @@ export function AdminDashboard({ onNavigate }: Props) {
                     {field.crop_type} {field.location ? `· ${field.location}` : ''}
                   </p>
                 </div>
-
                 <div className="flex items-center gap-2">
                   <StageBadge stage={field.current_stage} />
                   <StatusBadge status={field.status} />
@@ -137,13 +152,11 @@ export function AdminDashboard({ onNavigate }: Props) {
 
         {/* SIDE PANEL */}
         <div className="space-y-6">
-
           <div className="bg-white rounded-xl border p-6">
             <h2 className="font-semibold mb-4 flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-green-700" />
               Status Breakdown
             </h2>
-
             <StatusBar label="Active" count={active} total={fields.length} color="bg-emerald-500" />
             <StatusBar label="At Risk" count={atRisk} total={fields.length} color="bg-amber-400" />
             <StatusBar label="Completed" count={completed} total={fields.length} color="bg-slate-400" />
@@ -151,7 +164,6 @@ export function AdminDashboard({ onNavigate }: Props) {
 
           <div className="bg-white rounded-xl border p-6">
             <h2 className="font-semibold mb-4">Stage Distribution</h2>
-
             {Object.entries(stageBreakdown).map(([stage, count]) => (
               <div key={stage} className="flex justify-between text-sm mb-1">
                 <span className="capitalize text-slate-600">{stage}</span>
@@ -159,7 +171,6 @@ export function AdminDashboard({ onNavigate }: Props) {
               </div>
             ))}
           </div>
-
         </div>
       </div>
 
@@ -178,13 +189,32 @@ export function AdminDashboard({ onNavigate }: Props) {
           )}
 
           {recentUpdates.map(update => (
-            <div key={update.id} className="px-6 py-3">
-              <p className="text-sm">
-                <span className="font-medium">Agent</span> updated a field
-              </p>
-              <p className="text-xs text-slate-400">
-                {new Date(update.created_at).toLocaleString()}
-              </p>
+            <div key={update.id} className="px-6 py-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">
+                    {update.field_name}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    <span className="font-medium text-green-700">
+                      {update.agent_name}  {/* agent name */}
+                    </span>
+                    {' '}updated stage to{' '}
+                    <span className="font-medium capitalize">{update.stage}</span>
+                  </p>
+                  {update.notes && (
+                    <p className="text-xs text-slate-400 mt-1 italic">
+                      "{update.notes}"
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <StageBadge stage={update.stage} />
+                  <p className="text-xs text-slate-400">
+                    {new Date(update.created_at).toLocaleString()}
+                  </p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -208,7 +238,6 @@ function StatCard({ icon, label, value, bg }: any) {
 
 function StatusBar({ label, count, total, color }: any) {
   const pct = total ? (count / total) * 100 : 0;
-
   return (
     <div className="mb-3">
       <div className="flex justify-between text-sm">

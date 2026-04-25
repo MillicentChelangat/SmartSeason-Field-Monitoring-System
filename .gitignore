@@ -1,0 +1,5 @@
+frontend/.bolt/
+frontend/deriv-bot.xml
+*.png
+backend/**/__pycache__/
+backend/**/*.pyc

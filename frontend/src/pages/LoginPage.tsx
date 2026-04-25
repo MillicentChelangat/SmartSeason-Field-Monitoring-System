@@ -29,7 +29,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     setLoading(true);
 
     try {
-      // ================= LOGIN =================
+      //  LOGIN
       if (mode === 'login') {
         const res = await API.post('login/', { email, password });
         const { tokens, user } = res.data;
@@ -42,7 +42,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         onLoginSuccess(user); 
       }
 
-      // ================= REGISTER =================
+      // REGISTER
       else {
         if (!fullName.trim()) {
           setError('Full name is required.');

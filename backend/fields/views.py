@@ -136,8 +136,8 @@ def get_agents(request):
     for profile in profiles:
         fields = profile.user.assigned_fields.values('id', 'name', 'crop_type')
         result.append({
-            'id': profile.id,           # ✅ Profile id
-            'user_id': profile.user.id, # ✅ User id — this is what assigned_agent_id matches
+            'id': profile.id,           
+            'user_id': profile.user.id, 
             'full_name': profile.full_name,
             'email': profile.user.username,
             'phone': profile.phone,

@@ -21,7 +21,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('dashboard');
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);  // ✅ added
+  const [refreshKey, setRefreshKey] = useState(0); 
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -40,7 +40,7 @@ export default function App() {
     if (fieldId) {
       setSelectedFieldId(fieldId);
     } else {
-      setRefreshKey(prev => prev + 1);  // ✅ increment on every navigation back
+      setRefreshKey(prev => prev + 1);  
     }
   }
 
@@ -76,7 +76,7 @@ export default function App() {
       return (
         <FieldDetailPage
           fieldId={selectedFieldId}
-          onBack={() => navigate(isAdmin ? 'fields' : 'my-fields')}  // ✅ use navigate not setPage
+          onBack={() => navigate(isAdmin ? 'fields' : 'my-fields')} 
         />
       );
     }
@@ -105,7 +105,7 @@ export default function App() {
       <Navbar
         user={user}
         currentPage={page}
-        onNavigate={(target) => navigate(target)}  // ✅ use navigate not setPage
+        onNavigate={(target) => navigate(target)}  
         onLogout={handleLogout}
       />
       <main>{renderPage()}</main>

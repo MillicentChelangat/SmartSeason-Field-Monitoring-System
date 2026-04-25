@@ -102,7 +102,7 @@ export function FieldsPage({ onNavigate }: Props) {
   async function handleAssign(fieldId: number) {
     try {
       await API.post(`fields/${fieldId}/assign/`, {
-        agent_id: selectedAgent ? Number(selectedAgent) : null  // ✅ convert to number
+        agent_id: selectedAgent ? Number(selectedAgent) : null  
       });
       setAssigningFieldId(null);
       setSelectedAgent('');
@@ -253,7 +253,7 @@ export function FieldsPage({ onNavigate }: Props) {
                   >
                     <option value="">-- Unassign --</option>
                     {agents.map(a => (
-                      <option key={a.user_id} value={String(a.user_id)}>  {/* ✅ String(a.user_id) */}
+                      <option key={a.user_id} value={String(a.user_id)}>  
                         {a.full_name}
                       </option>
                     ))}

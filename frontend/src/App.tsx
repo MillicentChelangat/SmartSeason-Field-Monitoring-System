@@ -9,45 +9,31 @@ import { AgentsPage } from './pages/AgentsPage';
 import { Navbar } from './components/Navbar';
 import { LoadingSpinner } from './components/LoadingSpinner';
 
-type Page =
-  | 'dashboard'
-  | 'fields'
-  | 'my-fields'
-  | 'agents'
-  | 'field-detail';
+type Page = 'dashboard' | 'fields' | 'my-fields' | 'agents' | 'field-detail';
 
 export default function App() {
-  const [user, setUser] = useState<any>(null);
-  const [page, setPage] = useState<Page>('dashboard');
+  const [user, setUser]                     = useState<any>(null);
+  const [page, setPage]                     = useState<Page>('dashboard');
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0); 
+  const [loading, setLoading]               = useState(true);
+  const [refreshKey, setRefreshKey]         = useState(0);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
     if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem('user');
-      }
+      try { setUser(JSON.parse(stored)); }
+      catch { localStorage.removeItem('user'); }
     }
     setLoading(false);
   }, []);
 
   function navigate(target: string, fieldId?: string) {
     setPage(target as Page);
-    if (fieldId) {
-      setSelectedFieldId(fieldId);
-    } else {
-      setRefreshKey(prev => prev + 1);  
-    }
+    if (fieldId) { setSelectedFieldId(fieldId); }
+    else { setRefreshKey(prev => prev + 1); }
   }
 
-  function handleLoginSuccess(u: any) {
-    setUser(u);
-    setPage('dashboard');
-  }
+  function handleLoginSuccess(u: any) { setUser(u); setPage('dashboard'); }
 
   function handleLogout() {
     localStorage.removeItem('access');
@@ -65,9 +51,7 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
-  }
+  if (!user) return <LoginPage onLoginSuccess={handleLoginSuccess} />;
 
   const isAdmin = user.role === 'admin';
 
@@ -76,7 +60,10 @@ export default function App() {
       return (
         <FieldDetailPage
           fieldId={selectedFieldId}
-          onBack={() => navigate(isAdmin ? 'fields' : 'my-fields')} 
+          onBack={() => navigate(isAdmin ? 'fields' : 'my-fields')}
+          onNavigate={navigate}
+          onLogout={handleLogout}
+          user={user}
         />
       );
     }
@@ -84,11 +71,11 @@ export default function App() {
     if (isAdmin) {
       switch (page) {
         case 'fields':
-          return <FieldsPage key={refreshKey} onNavigate={navigate} />;
+          return <FieldsPage key={refreshKey} onNavigate={navigate} onLogout={handleLogout} user={user} />;
         case 'agents':
-          return <AgentsPage key={refreshKey} />;
+          return <AgentsPage key={refreshKey} onNavigate={navigate} onLogout={handleLogout} user={user} />;
         default:
-          return <AdminDashboard key={refreshKey} onNavigate={navigate} />;
+          return <AdminDashboard key={refreshKey} onNavigate={navigate} onLogout={handleLogout} user={user} />;
       }
     } else {
       switch (page) {
@@ -100,14 +87,13 @@ export default function App() {
     }
   }
 
+  // Admin pages own their full layout (sidebar included) — no Navbar wrapper
+  if (isAdmin) return <>{renderPage()}</>;
+
+  // Agents keep the existing Navbar layout
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navbar
-        user={user}
-        currentPage={page}
-        onNavigate={(target) => navigate(target)}  
-        onLogout={handleLogout}
-      />
+      <Navbar user={user} currentPage={page} onNavigate={(t) => navigate(t)} onLogout={handleLogout} />
       <main>{renderPage()}</main>
     </div>
   );

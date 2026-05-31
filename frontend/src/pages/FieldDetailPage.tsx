@@ -6,6 +6,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { StageBadge } from '../components/StageBadge';
 import { computeFieldStatus } from '../lib/fieldStatus';
 import { AdminShell } from '../components/AdminShell';
+import { AgentShell } from '../components/AgentShell';
 
 const STAGES = ['planted', 'growing', 'ready', 'harvested'] as const;
 type FieldStage = typeof STAGES[number];
@@ -97,14 +98,17 @@ export function FieldDetailPage({ fieldId, onBack, onNavigate, onLogout, user }:
     );
   }
 
+  const Shell = isAdmin ? AdminShell : AgentShell;
+  const activePage = isAdmin ? 'fields' : 'my-fields';
+
   if (!field) {
     return (
-      <AdminShell activePage="fields" onNavigate={onNavigate} onLogout={onLogout} user={storedUser}>
+      <Shell activePage={activePage} onNavigate={onNavigate} onLogout={onLogout} user={storedUser}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#aaa' }}>
           <p style={{ fontSize: 13 }}>Field not found.</p>
           <button onClick={onBack} style={{ marginTop: 12, fontSize: 12, color: '#1d6b35', background: 'none', border: 'none', cursor: 'pointer' }}>← Go back</button>
         </div>
-      </AdminShell>
+      </Shell>
     );
   }
 
@@ -113,7 +117,7 @@ export function FieldDetailPage({ fieldId, onBack, onNavigate, onLogout, user }:
   const currentStepIdx    = STAGE_STEPS.indexOf(field.current_stage);
 
   return (
-    <AdminShell activePage="fields" onNavigate={onNavigate} onLogout={onLogout} user={storedUser}>
+    <Shell activePage={activePage} onNavigate={onNavigate} onLogout={onLogout} user={storedUser}>
 
       {/* Topbar */}
       <div style={{ background: '#fff', borderRadius: 12, padding: '0 18px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, marginBottom: 10 }}>
@@ -307,6 +311,6 @@ export function FieldDetailPage({ fieldId, onBack, onNavigate, onLogout, user }:
           </div>
         </div>
       </div>
-    </AdminShell>
+    </Shell>
   );
 }

@@ -1,5 +1,15 @@
+# Frontend specific
 frontend/.bolt/
 frontend/deriv-bot.xml
-*.png
-backend/**/__pycache__/
-backend/**/*.pyc
+frontend/node_modules/
+
+# Python
+__pycache__/
+*.pyc
+
+# Django database
+db.sqlite3
+
+# Build outputs
+dist/
+build/

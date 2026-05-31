@@ -266,9 +266,9 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
           {[
             {
               label: 'Total Fields', value: fields.length,
-              icon: <MapPin size={14} color="#a8e6be" />,
-              bg: '#0f2e1a', labelColor: 'rgba(168,230,190,0.6)', valueColor: '#fff',
-              iconBg: 'rgba(255,255,255,0.08)', trend: '↑ 2 from last season', trendColor: 'rgba(168,230,190,0.6)',
+              icon: <MapPin size={14} color="#1d6b35" />,
+              bg: '#fff', labelColor: '#888', valueColor: '#111',
+              iconBg: '#e8f5ee', trend: '↑ 2 from last season', trendColor: '#2d7a45',
             },
             {
               label: 'Field Agents', value: agentCount,
@@ -289,7 +289,27 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
               iconBg: '#f0f2ee', trend: 'Ready to harvest', trendColor: '#888',
             },
           ].map(({ label, value, icon, bg, labelColor, valueColor, iconBg, trend, trendColor }) => (
-            <div key={label} style={{ background: bg, borderRadius: 12, padding: '12px 14px' }}>
+            <div
+              key={label}
+              style={{ background: bg, borderRadius: 12, padding: '12px 14px', cursor: 'pointer', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.background = '#1d6b35';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(29,107,53,0.25)';
+                // flip all text/icon colours to white
+                e.currentTarget.querySelectorAll('span, p').forEach((el: any) => {
+                  el.style.color = 'rgba(255,255,255,0.9)';
+                });
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.background = bg;
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.querySelectorAll('span, p').forEach((el: any) => {
+                  el.style.color = '';
+                });
+              }}
+            >
               <div className="flex justify-between items-start" style={{ marginBottom: 8 }}>
                 <span style={{ fontSize: 10, fontWeight: 500, color: labelColor, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</span>
                 <div style={{ width: 28, height: 28, borderRadius: 7, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon}</div>

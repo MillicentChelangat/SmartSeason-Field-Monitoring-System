@@ -6,17 +6,22 @@ import { FieldsPage } from './pages/FieldsPage';
 import { MyFieldsPage } from './pages/MyFieldsPage';
 import { FieldDetailPage } from './pages/FieldDetailPage';
 import { AgentsPage } from './pages/AgentsPage';
-import { Navbar } from './components/Navbar';
+import { AnalyticsPage } from './pages/AnalyticsPage';
+import { ReportsPage } from './pages/ReportsPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { HelpPage } from './pages/HelpPage';
 import { LoadingSpinner } from './components/LoadingSpinner';
 
-type Page = 'dashboard' | 'fields' | 'my-fields' | 'agents' | 'field-detail';
+type Page =
+  | 'dashboard' | 'fields' | 'my-fields' | 'agents'
+  | 'field-detail' | 'analytics' | 'reports' | 'settings' | 'help';
 
 export default function App() {
-  const [user, setUser]                     = useState<any>(null);
-  const [page, setPage]                     = useState<Page>('dashboard');
+  const [user, setUser]                       = useState<any>(null);
+  const [page, setPage]                       = useState<Page>('dashboard');
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
-  const [loading, setLoading]               = useState(true);
-  const [refreshKey, setRefreshKey]         = useState(0);
+  const [loading, setLoading]                 = useState(true);
+  const [refreshKey, setRefreshKey]           = useState(0);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -45,7 +50,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#eef0eb] flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -53,7 +58,8 @@ export default function App() {
 
   if (!user) return <LoginPage onLoginSuccess={handleLoginSuccess} />;
 
-  const isAdmin = user.role === 'admin';
+  const isAdmin    = user.role === 'admin';
+  const sharedProps = { onNavigate: navigate, onLogout: handleLogout, user };
 
   function renderPage() {
     if (page === 'field-detail' && selectedFieldId) {
@@ -61,40 +67,31 @@ export default function App() {
         <FieldDetailPage
           fieldId={selectedFieldId}
           onBack={() => navigate(isAdmin ? 'fields' : 'my-fields')}
-          onNavigate={navigate}
-          onLogout={handleLogout}
-          user={user}
+          {...sharedProps}
         />
       );
     }
 
     if (isAdmin) {
       switch (page) {
-        case 'fields':
-          return <FieldsPage key={refreshKey} onNavigate={navigate} onLogout={handleLogout} user={user} />;
-        case 'agents':
-          return <AgentsPage key={refreshKey} onNavigate={navigate} onLogout={handleLogout} user={user} />;
-        default:
-          return <AdminDashboard key={refreshKey} onNavigate={navigate} onLogout={handleLogout} user={user} />;
+        case 'fields':    return <FieldsPage    key={refreshKey} {...sharedProps} />;
+        case 'agents':    return <AgentsPage    key={refreshKey} {...sharedProps} />;
+        case 'analytics': return <AnalyticsPage key={refreshKey} {...sharedProps} />;
+        case 'reports':   return <ReportsPage   key={refreshKey} {...sharedProps} />;
+        case 'settings':  return <SettingsPage  key={refreshKey} {...sharedProps} />;
+        case 'help':      return <HelpPage      key={refreshKey} {...sharedProps} />;
+        default:          return <AdminDashboard key={refreshKey} {...sharedProps} />;
       }
     } else {
       switch (page) {
-        case 'my-fields':
-          return <MyFieldsPage key={refreshKey} onNavigate={navigate} />;
-        default:
-          return <AgentDashboard key={refreshKey} onNavigate={navigate} onLogout={handleLogout} />;
+        case 'my-fields': return <MyFieldsPage key={refreshKey} {...sharedProps} />;
+        case 'settings':  return <SettingsPage key={refreshKey} {...sharedProps} />;
+        case 'help':      return <HelpPage     key={refreshKey} {...sharedProps} />;
+        default:          return <AgentDashboard key={refreshKey} {...sharedProps} />;
       }
     }
   }
 
-  // Admin pages own their full layout (sidebar included) — no Navbar wrapper
-  if (isAdmin) return <>{renderPage()}</>;
-
-  // Agents keep the existing Navbar layout
-  return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar user={user} currentPage={page} onNavigate={(t) => navigate(t)} onLogout={handleLogout} />
-      <main>{renderPage()}</main>
-    </div>
-  );
+  // All pages now own their full layout — no Navbar wrapper needed
+  return <>{renderPage()}</>;
 }

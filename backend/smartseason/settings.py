@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-2#a+s(#0ox#su9^0h@5_fs2o9h)k_$5h%6#g##nv=fxhyq)a8u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "smartseason-field-monitoring-system-1-bm87.onrender.com",
+    "127.0.0.1",
+    "localhost"
+]
 
 
 # Application definition
@@ -127,5 +131,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
  
 CORS_ALLOW_ALL_ORIGINS = True

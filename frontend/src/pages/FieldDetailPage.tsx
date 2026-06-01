@@ -6,7 +6,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { StageBadge } from '../components/StageBadge';
 import { computeFieldStatus } from '../lib/fieldStatus';
 import { AdminShell } from '../components/AdminShell';
-import { AgentShell } from '../components/Agentshell';
+import { AgentShell } from '../components/AgentShell';
 
 const STAGES = ['planted', 'growing', 'ready', 'harvested'] as const;
 type FieldStage = typeof STAGES[number];

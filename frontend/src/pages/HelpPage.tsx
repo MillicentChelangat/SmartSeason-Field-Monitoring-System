@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { HelpCircle, ChevronDown, ChevronUp, Send, MessageSquare, BookOpen, Mail } from 'lucide-react';
 import { AdminShell } from '../components/AdminShell';
-import { AgentShell } from '../components/AgentShell';
+import { AgentShell } from '../components/Agentshell';
 
 interface Props {
   onNavigate: (page: string, fieldId?: string) => void;

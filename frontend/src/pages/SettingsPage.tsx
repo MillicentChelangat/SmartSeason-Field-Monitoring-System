@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { User, Bell, Globe, Shield, Save, Eye, EyeOff } from 'lucide-react';
 import API from '../api/api';
 import { AdminShell } from '../components/AdminShell';
-import { AgentShell } from '../components/AgentShell';
+import { AgentShell } from '../components/Agentshell';
 
 interface Props {
   onNavigate: (page: string, fieldId?: string) => void;

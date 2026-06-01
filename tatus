@@ -1,0 +1,16 @@
+[33mcommit 7449c4771b4cefbe8845b7f7e6558542fb2d6319[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: MillicentChelangat <millicentchelangat42@gmail.com>
+Date:   Mon Jun 1 22:15:14 2026 +0300
+
+    fix: resolve AgentShell import
+
+[1mdiff --git a/frontend/.gitignore b/frontend/.gitignore[m
+[1mindex a534bbc..37d6c7d 100644[m
+[1m--- a/frontend/.gitignore[m
+[1m+++ b/frontend/.gitignore[m
+[36m@@ -21,3 +21,4 @@[m [mdist-ssr[m
+ *.sln[m
+ *.sw?[m
+ .env[m
+[32m+[m[32mbackend/venv/[m
+\ No newline at end of file[m

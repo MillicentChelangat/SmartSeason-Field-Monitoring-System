@@ -9,7 +9,7 @@ import { computeFieldStatus } from '../lib/fieldStatus';
 import { StatusBadge } from '../components/StatusBadge';
 import { StageBadge } from '../components/StageBadge';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { AgentShell } from '../components/Agentshell';
+import { AgentShell } from '../components/AgentShell';
 
 
 interface FieldWithStatus extends Field {

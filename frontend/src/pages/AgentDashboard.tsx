@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   MapPin, CheckCircle2, AlertTriangle, Activity,
-  Plus, ChevronRight, Clock, Layers
+  Plus, ChevronRight, Clock, Layers, X
 } from 'lucide-react';
 import API from '../api/api';
 import type { Field, FieldUpdate } from '../types/database';
@@ -10,7 +10,6 @@ import { StatusBadge } from '../components/StatusBadge';
 import { StageBadge } from '../components/StageBadge';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { AgentShell } from '../components/AgentShell';
-
 
 interface FieldWithStatus extends Field {
   status: ReturnType<typeof computeFieldStatus>;
@@ -32,8 +31,6 @@ const STAGE_COLORS: Record<string, string> = {
   harvested: '#888',
 };
 
-const STAT_HOVER_BG = '#1d6b35';
-
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -44,30 +41,11 @@ function timeAgo(dateStr: string) {
   return `${mins}m ago`;
 }
 
-function StageProgressBar({ stage }: { stage: string }) {
-  const idx = STAGE_STEPS.indexOf(stage);
-  return (
-    <div style={{ display: 'flex', gap: 3, marginTop: 6 }}>
-      {STAGE_STEPS.map((s, i) => (
-        <div
-          key={s}
-          style={{
-            flex: 1, height: 4, borderRadius: 2,
-            background: i <= idx ? STAGE_COLORS[s] : '#f0f2ee',
-            transition: 'background 0.2s',
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
 export function AgentDashboard({ onNavigate, onLogout, user }: Props) {
   const [fields, setFields]               = useState<FieldWithStatus[]>([]);
   const [recentUpdates, setRecentUpdates] = useState<FieldUpdate[]>([]);
   const [loading, setLoading]             = useState(true);
   const [showQuickUpdate, setShowQuickUpdate] = useState(false);
-  const [selectedField, setSelectedField] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -98,7 +76,7 @@ export function AgentDashboard({ onNavigate, onLogout, user }: Props) {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#eef0eb' }}>
+      <div className="flex items-center justify-center h-screen bg-[#eef0eb]">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -118,252 +96,271 @@ export function AgentDashboard({ onNavigate, onLogout, user }: Props) {
 
   return (
     <AgentShell activePage="dashboard" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+      {/* Scrollable page wrapper */}
+      <div className="h-full overflow-y-auto">
+        <div className="p-3 lg:p-0 flex flex-col gap-3">
 
-      {/* Topbar */}
-      <div style={{ background: '#fff', borderRadius: 12, padding: '0 18px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, marginBottom: 10 }}>
-        <div>
-          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111' }}>
-            Welcome back, {user?.full_name?.split(' ')[0] || 'Agent'} 👋
-          </h1>
-          <p style={{ fontSize: 11, color: '#888', marginTop: 1 }}>Here's what's happening with your fields today</p>
-        </div>
-        <button
-          onClick={() => setShowQuickUpdate(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 16px', borderRadius: 8, background: '#1d6b35', color: '#fff', border: 'none', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", boxShadow: '0 2px 8px rgba(29,107,53,0.3)' }}
-        >
-          <Plus size={14} /> Add Update
-        </button>
-      </div>
-
-      {/* Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, flexShrink: 0, marginBottom: 10 }}>
-        {statCards.map(({ label, value, icon, iconBg, valueColor, trend, trendColor }) => (
-          <div
-            key={label}
-            style={{ background: '#fff', borderRadius: 12, padding: '12px 14px', cursor: 'pointer', transition: 'transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease' }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.background = STAT_HOVER_BG;
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(29,107,53,0.25)';
-              e.currentTarget.querySelectorAll('span, p').forEach((el: any) => { el.style.color = 'rgba(255,255,255,0.9)'; });
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.background = '#fff';
-              e.currentTarget.style.boxShadow = 'none';
-              e.currentTarget.querySelectorAll('span, p').forEach((el: any) => { el.style.color = ''; });
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-              <span style={{ fontSize: 10, fontWeight: 500, color: '#888', textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</span>
-              <div style={{ width: 28, height: 28, borderRadius: 7, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icon}</div>
+          {/* ── Topbar ── */}
+          <div className="bg-white rounded-xl px-4 py-3 flex items-center justify-between gap-3 flex-shrink-0">
+            <div className="min-w-0">
+              <h1 className="font-bold text-[#111] truncate" style={{ fontFamily: "'Syne', sans-serif", fontSize: 16 }}>
+                Welcome back, {user?.full_name?.split(' ')[0] || 'Agent'} 👋
+              </h1>
+              <p className="text-[11px] text-[#888] mt-0.5 hidden sm:block">Here's what's happening with your fields today</p>
             </div>
-            <p style={{ fontFamily: "'Syne', sans-serif", fontSize: 24, fontWeight: 700, color: valueColor, lineHeight: 1 }}>{value}</p>
-            <p style={{ fontSize: 10, color: trendColor, marginTop: 5 }}>{trend}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Main Grid */}
-      <div style={{ flex: 1, display: 'flex', gap: 10, minHeight: 0 }}>
-
-        {/* Left col — fields + at risk */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 0 }}>
-
-          {/* My Fields with stage progress */}
-          <div style={{ flex: 2, background: '#fff', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', borderBottom: '0.5px solid #f0f2ee', flexShrink: 0 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 600, color: '#111' }}>
-                <MapPin size={14} color="#1d6b35" /> My Fields
-              </span>
-              <button onClick={() => onNavigate('my-fields')} style={{ fontSize: 11.5, color: '#1d6b35', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', gap: 3 }}>
-                View all <ChevronRight size={12} />
-              </button>
-            </div>
-
-            {fields.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#aaa', gap: 6 }}>
-                <MapPin size={28} style={{ opacity: 0.2 }} />
-                <p style={{ fontSize: 12 }}>No fields assigned yet.</p>
-              </div>
-            ) : (
-              <div style={{ overflowY: 'auto', flex: 1 }}>
-                {fields.slice(0, 6).map((field, idx) => {
-                  const stageIdx = STAGE_STEPS.indexOf(field.current_stage);
-                  return (
-                    <button
-                      key={field.id}
-                      onClick={() => onNavigate('field-detail', String(field.id))}
-                      style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 16px', borderBottom: idx < Math.min(fields.length, 6) - 1 ? '0.5px solid #f5f6f4' : 'none', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: "'DM Sans', sans-serif", transition: 'background 0.12s' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = '#f8fbf9')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                    >
-                      {/* Stage colour indicator */}
-                      <div style={{ width: 36, height: 36, borderRadius: 9, background: `${STAGE_COLORS[field.current_stage]}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                        <Layers size={15} color={STAGE_COLORS[field.current_stage]} />
-                      </div>
-
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                          <p style={{ fontSize: 13, fontWeight: 600, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{field.name}</p>
-                          <StatusBadge status={field.status} />
-                        </div>
-                        <p style={{ fontSize: 11, color: '#888', marginBottom: 4 }}>
-                          {field.crop_type}{field.location ? ` · ${field.location}` : ''}
-                        </p>
-                        {/* Stage progress bar */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <div style={{ flex: 1, display: 'flex', gap: 3 }}>
-                            {STAGE_STEPS.map((s, i) => (
-                              <div key={s} style={{ flex: 1, height: 4, borderRadius: 2, background: i <= stageIdx ? STAGE_COLORS[s] : '#f0f2ee', transition: 'background 0.2s' }} />
-                            ))}
-                          </div>
-                          <span style={{ fontSize: 10, color: STAGE_COLORS[field.current_stage], fontWeight: 600, textTransform: 'capitalize', flexShrink: 0 }}>{field.current_stage}</span>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <button
+              onClick={() => setShowQuickUpdate(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-[12.5px] font-semibold flex-shrink-0"
+              style={{ background: '#1d6b35', fontFamily: "'DM Sans', sans-serif", boxShadow: '0 2px 8px rgba(29,107,53,0.3)' }}
+            >
+              <Plus size={14} />
+              <span>Add Update</span>
+            </button>
           </div>
 
-          {/* At Risk Alert Panel */}
-          <div style={{ flex: 1, background: '#fff', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', borderBottom: '0.5px solid #f0f2ee', flexShrink: 0 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 600, color: '#111' }}>
-                <AlertTriangle size={14} color="#e85d3a" /> At-Risk Fields
-                {atRiskFields.length > 0 && (
-                  <span style={{ background: '#fde8e4', color: '#e85d3a', fontSize: 10, fontWeight: 700, padding: '1px 7px', borderRadius: 10 }}>
-                    {atRiskFields.length}
+          {/* ── Stat Cards — 2×2 on mobile, 4×1 on desktop ── */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 flex-shrink-0">
+            {statCards.map(({ label, value, icon, iconBg, valueColor, trend, trendColor }) => (
+              <div
+                key={label}
+                className="bg-white rounded-xl p-3 lg:p-3.5 cursor-pointer transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[10px] font-medium text-[#888] uppercase tracking-wide">{label}</span>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: iconBg }}>
+                    {icon}
+                  </div>
+                </div>
+                <p className="font-bold leading-none mb-1.5" style={{ fontFamily: "'Syne', sans-serif", fontSize: 26, color: valueColor }}>{value}</p>
+                <p className="text-[10px]" style={{ color: trendColor }}>{trend}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Main content — stacked on mobile, side-by-side on desktop ── */}
+          <div className="flex flex-col lg:flex-row gap-3 lg:min-h-0">
+
+            {/* Left column */}
+            <div className="flex flex-col gap-3 flex-1 lg:min-h-0">
+
+              {/* My Fields */}
+              <div className="bg-white rounded-xl overflow-hidden flex flex-col lg:flex-2 lg:min-h-0" style={{ minHeight: 220 }}>
+                <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#f0f2ee] flex-shrink-0">
+                  <span className="flex items-center gap-1.5 text-[12.5px] font-semibold text-[#111]">
+                    <MapPin size={14} color="#1d6b35" /> My Fields
                   </span>
-                )}
-              </span>
-            </div>
-            <div style={{ overflowY: 'auto', flex: 1 }}>
-              {atRiskFields.length === 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 6 }}>
-                  <CheckCircle2 size={24} color="#2d7a45" style={{ opacity: 0.4 }} />
-                  <p style={{ fontSize: 12, color: '#aaa' }}>All fields are healthy!</p>
-                </div>
-              ) : (
-                atRiskFields.map((field, idx) => (
                   <button
-                    key={field.id}
-                    onClick={() => onNavigate('field-detail', String(field.id))}
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: idx < atRiskFields.length - 1 ? '0.5px solid #f5f6f4' : 'none', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: "'DM Sans', sans-serif", transition: 'background 0.12s' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#fff8f7')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    onClick={() => onNavigate('my-fields')}
+                    className="flex items-center gap-1 text-[11.5px] font-medium bg-none border-none cursor-pointer"
+                    style={{ color: '#1d6b35', fontFamily: "'DM Sans', sans-serif" }}
                   >
-                    <div style={{ width: 34, height: 34, borderRadius: 8, background: '#fde8e4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <AlertTriangle size={15} color="#e85d3a" />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 12.5, fontWeight: 600, color: '#111' }}>{field.name}</p>
-                      <p style={{ fontSize: 11, color: '#888' }}>{field.crop_type} · {field.current_stage}</p>
-                    </div>
-                    <div style={{ display: 'flex', flex: 'column', alignItems: 'flex-end', gap: 4 }}>
-                      <span style={{ fontSize: 10.5, color: '#e85d3a', fontWeight: 600, background: '#fde8e4', padding: '2px 8px', borderRadius: 5 }}>At Risk</span>
-                    </div>
-                    <ChevronRight size={13} color="#ccc" />
+                    View all <ChevronRight size={12} />
                   </button>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Right col — recent updates */}
-        <div style={{ width: 260, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
-
-          {/* Recent Updates timeline */}
-          <div style={{ flex: 1, background: '#fff', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div style={{ padding: '11px 16px', borderBottom: '0.5px solid #f0f2ee', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Clock size={14} color="#1d6b35" />
-              <p style={{ fontSize: 12.5, fontWeight: 600, color: '#111' }}>My Recent Updates</p>
-            </div>
-            <div style={{ overflowY: 'auto', flex: 1, padding: '10px 16px' }}>
-              {recentUpdates.length === 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 6, color: '#aaa' }}>
-                  <Activity size={24} style={{ opacity: 0.2 }} />
-                  <p style={{ fontSize: 12 }}>No updates yet.</p>
                 </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {recentUpdates.map((update, idx) => (
-                    <div key={update.id} style={{ display: 'flex', gap: 10, paddingBottom: idx < recentUpdates.length - 1 ? 14 : 0 }}>
-                      {/* Timeline dot + line */}
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-                        <div style={{ width: 9, height: 9, borderRadius: '50%', background: STAGE_COLORS[update.stage] ?? '#888', marginTop: 3, flexShrink: 0 }} />
-                        {idx < recentUpdates.length - 1 && (
-                          <div style={{ width: 1.5, flex: 1, background: '#f0f2ee', marginTop: 3 }} />
-                        )}
-                      </div>
-                      {/* Content */}
-                      <div style={{ flex: 1, paddingBottom: 4 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: '#111' }}>
-                            {fields.find(f => f.id === update.field_id)?.name ?? `Field #${update.field_id}`}
-                          </p>
-                          <span style={{ fontSize: 10, color: '#aaa' }}>{timeAgo(update.created_at)}</span>
+
+                {fields.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center flex-1 gap-1.5 text-[#aaa] py-10">
+                    <MapPin size={28} style={{ opacity: 0.2 }} />
+                    <p className="text-xs">No fields assigned yet.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-y-auto lg:flex-1">
+                    {fields.slice(0, 6).map((field, idx) => {
+                      const stageIdx = STAGE_STEPS.indexOf(field.current_stage);
+                      return (
+                        <button
+                          key={field.id}
+                          onClick={() => onNavigate('field-detail', String(field.id))}
+                          className="w-full flex items-start gap-3 px-4 py-2.5 bg-transparent border-none cursor-pointer text-left transition-colors duration-100 hover:bg-[#f8fbf9]"
+                          style={{ borderBottom: idx < Math.min(fields.length, 6) - 1 ? '0.5px solid #f5f6f4' : 'none', fontFamily: "'DM Sans', sans-serif" }}
+                        >
+                          <div
+                            className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                            style={{ background: `${STAGE_COLORS[field.current_stage]}18` }}
+                          >
+                            <Layers size={15} color={STAGE_COLORS[field.current_stage]} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-0.5 gap-2">
+                              <p className="text-[13px] font-semibold text-[#111] truncate">{field.name}</p>
+                              <StatusBadge status={field.status} />
+                            </div>
+                            <p className="text-[11px] text-[#888] mb-1.5">
+                              {field.crop_type}{field.location ? ` · ${field.location}` : ''}
+                            </p>
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex-1 flex gap-0.5">
+                                {STAGE_STEPS.map((s, i) => (
+                                  <div
+                                    key={s}
+                                    className="flex-1 h-1 rounded-sm transition-colors duration-200"
+                                    style={{ background: i <= stageIdx ? STAGE_COLORS[s] : '#f0f2ee' }}
+                                  />
+                                ))}
+                              </div>
+                              <span
+                                className="text-[10px] font-semibold capitalize flex-shrink-0"
+                                style={{ color: STAGE_COLORS[field.current_stage] }}
+                              >
+                                {field.current_stage}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* At-Risk Fields */}
+              <div className="bg-white rounded-xl overflow-hidden flex flex-col" style={{ minHeight: 140 }}>
+                <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#f0f2ee] flex-shrink-0">
+                  <span className="flex items-center gap-1.5 text-[12.5px] font-semibold text-[#111]">
+                    <AlertTriangle size={14} color="#e85d3a" /> At-Risk Fields
+                    {atRiskFields.length > 0 && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#fde8e4', color: '#e85d3a' }}>
+                        {atRiskFields.length}
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <div className="overflow-y-auto flex-1">
+                  {atRiskFields.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full gap-1.5 py-8">
+                      <CheckCircle2 size={24} color="#2d7a45" style={{ opacity: 0.4 }} />
+                      <p className="text-xs text-[#aaa]">All fields are healthy!</p>
+                    </div>
+                  ) : (
+                    atRiskFields.map((field, idx) => (
+                      <button
+                        key={field.id}
+                        onClick={() => onNavigate('field-detail', String(field.id))}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 bg-transparent border-none cursor-pointer text-left transition-colors duration-100 hover:bg-[#fff8f7]"
+                        style={{ borderBottom: idx < atRiskFields.length - 1 ? '0.5px solid #f5f6f4' : 'none', fontFamily: "'DM Sans', sans-serif" }}
+                      >
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#fde8e4' }}>
+                          <AlertTriangle size={14} color="#e85d3a" />
                         </div>
-                        <StageBadge stage={update.stage} />
-                        {update.notes && (
-                          <p style={{ fontSize: 11, color: '#888', fontStyle: 'italic', marginTop: 4, lineHeight: 1.4 }}>"{update.notes}"</p>
-                        )}
-                      </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12.5px] font-semibold text-[#111]">{field.name}</p>
+                          <p className="text-[11px] text-[#888]">{field.crop_type} · {field.current_stage}</p>
+                        </div>
+                        <span className="text-[10.5px] font-semibold px-2 py-0.5 rounded flex-shrink-0" style={{ color: '#e85d3a', background: '#fde8e4' }}>
+                          At Risk
+                        </span>
+                        <ChevronRight size={13} color="#ccc" />
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right column — full width on mobile, 260px on desktop */}
+            <div className="flex flex-col gap-3 w-full lg:w-[260px] lg:flex-shrink-0">
+
+              {/* Recent Updates */}
+              <div className="bg-white rounded-xl overflow-hidden flex flex-col" style={{ minHeight: 200 }}>
+                <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-[#f0f2ee] flex-shrink-0">
+                  <Clock size={14} color="#1d6b35" />
+                  <p className="text-[12.5px] font-semibold text-[#111]">My Recent Updates</p>
+                </div>
+                <div className="overflow-y-auto flex-1 p-4">
+                  {recentUpdates.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full gap-1.5 text-[#aaa] py-8">
+                      <Activity size={24} style={{ opacity: 0.2 }} />
+                      <p className="text-xs">No updates yet.</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col">
+                      {recentUpdates.map((update, idx) => (
+                        <div key={update.id} className="flex gap-2.5" style={{ paddingBottom: idx < recentUpdates.length - 1 ? 14 : 0 }}>
+                          <div className="flex flex-col items-center flex-shrink-0">
+                            <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: STAGE_COLORS[update.stage] ?? '#888' }} />
+                            {idx < recentUpdates.length - 1 && (
+                              <div className="w-px flex-1 mt-1" style={{ background: '#f0f2ee' }} />
+                            )}
+                          </div>
+                          <div className="flex-1 pb-1">
+                            <div className="flex items-center justify-between mb-0.5 gap-2">
+                              <p className="text-[12px] font-semibold text-[#111] truncate">
+                                {fields.find(f => f.id === update.field_id)?.name ?? `Field #${update.field_id}`}
+                              </p>
+                              <span className="text-[10px] text-[#aaa] flex-shrink-0">{timeAgo(update.created_at)}</span>
+                            </div>
+                            <StageBadge stage={update.stage} />
+                            {update.notes && (
+                              <p className="text-[11px] text-[#888] italic mt-1 leading-snug">"{update.notes}"</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Season Summary */}
+              <div className="rounded-xl p-4 flex-shrink-0" style={{ background: '#0f2e1a' }}>
+                <p className="text-[11.5px] font-semibold mb-3 flex items-center gap-1.5" style={{ color: 'rgba(168,230,190,0.8)' }}>
+                  <Activity size={13} color="#a8e6be" /> Season Summary
+                </p>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { label: 'Total Updates Submitted', value: recentUpdates.length },
+                    { label: 'Fields in Progress',      value: active },
+                    { label: 'Fields Completed',        value: completed },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex justify-between items-center">
+                      <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>{label}</span>
+                      <span className="text-[13px] font-bold text-white">{value}</span>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Quick stats summary */}
-          <div style={{ background: '#0f2e1a', borderRadius: 12, padding: 16, flexShrink: 0 }}>
-            <p style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(168,230,190,0.8)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Activity size={13} color="#a8e6be" /> Season Summary
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {[
-                { label: 'Total Updates Submitted', value: recentUpdates.length },
-                { label: 'Fields in Progress',      value: active },
-                { label: 'Fields Completed',        value: completed },
-              ].map(({ label, value }) => (
-                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{label}</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{value}</span>
-                </div>
-              ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Update Modal */}
+      {/* ── Quick Update Modal ── */}
       {showQuickUpdate && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 24, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-              <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 15, fontWeight: 700, color: '#111' }}>Quick Field Update</h2>
-              <button onClick={() => setShowQuickUpdate(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 18 }}>✕</button>
+        <div className="fixed inset-0 flex items-end sm:items-center justify-center z-50" style={{ background: 'rgba(0,0,0,0.4)' }}>
+          {/* Bottom sheet on mobile, centered card on desktop */}
+          <div
+            className="bg-white w-full sm:w-auto sm:min-w-[360px] sm:max-w-[420px] sm:rounded-2xl rounded-t-2xl p-5 sm:p-6"
+            style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.2)', maxHeight: '85vh', overflowY: 'auto' }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[15px] font-bold text-[#111]" style={{ fontFamily: "'Syne', sans-serif" }}>Quick Field Update</h2>
+              <button
+                onClick={() => setShowQuickUpdate(false)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#f0f2ee] border-none cursor-pointer"
+              >
+                <X size={14} color="#555" />
+              </button>
             </div>
-            <p style={{ fontSize: 12, color: '#888', marginBottom: 14 }}>Select a field to add a full update.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {fields.map(field => (
+            <p className="text-[12px] text-[#888] mb-3">Select a field to add a full update.</p>
+            <div className="flex flex-col gap-2">
+              {fields.length === 0 ? (
+                <p className="text-center text-[12px] text-[#aaa] py-6">No fields assigned yet.</p>
+              ) : fields.map(field => (
                 <button
                   key={field.id}
                   onClick={() => { setShowQuickUpdate(false); onNavigate('field-detail', String(field.id)); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 9, border: '0.5px solid #e8eae4', background: '#fff', cursor: 'pointer', textAlign: 'left', fontFamily: "'DM Sans', sans-serif", transition: 'background 0.12s' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#f8fbf9')}
-                  onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
+                  className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-[#e8eae4] bg-white cursor-pointer text-left transition-colors duration-100 hover:bg-[#f8fbf9] w-full"
+                  style={{ fontFamily: "'DM Sans', sans-serif" }}
                 >
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${STAGE_COLORS[field.current_stage]}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: `${STAGE_COLORS[field.current_stage]}18` }}
+                  >
                     <MapPin size={14} color={STAGE_COLORS[field.current_stage]} />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: 13, fontWeight: 500, color: '#111' }}>{field.name}</p>
-                    <p style={{ fontSize: 11, color: '#888' }}>{field.crop_type} · {field.current_stage}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-medium text-[#111] truncate">{field.name}</p>
+                    <p className="text-[11px] text-[#888]">{field.crop_type} · {field.current_stage}</p>
                   </div>
                   <ChevronRight size={13} color="#ccc" />
                 </button>
@@ -372,7 +369,6 @@ export function AgentDashboard({ onNavigate, onLogout, user }: Props) {
           </div>
         </div>
       )}
-
     </AgentShell>
   );
 }

@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import {
-  Leaf, LayoutDashboard, MapPin, LogOut,
+  Leaf, LayoutDashboard, MapPin, LogOut, Menu, X,
 } from 'lucide-react';
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, section: 'menu' },
-  { id: 'my-fields', label: 'My Fields', icon: MapPin,           section: 'menu' },
+  { id: 'my-fields', label: 'My Fields', icon: MapPin, section: 'menu' },
 ];
 
 function initials(name: string) {
@@ -20,14 +21,18 @@ function initials(name: string) {
 }
 
 export function AgentShell({ children, activePage, onNavigate, onLogout, user }: Props) {
-  return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#eef0eb', fontFamily: "'DM Sans', sans-serif" }}>
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-      {/* ── SIDEBAR ── */}
-      <aside style={{ width: 200, flexShrink: 0, margin: 12, background: '#0f2e1a', borderRadius: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+  const handleNavigate = (page: string) => {
+    onNavigate(page);
+    setSidebarOpen(false); // close sidebar on mobile after nav
+  };
 
-        {/* Logo */}
-        <div style={{ padding: '18px 16px 16px', borderBottom: '0.5px solid rgba(255,255,255,0.08)' }}>
+  const SidebarContent = () => (
+    <>
+      {/* Logo */}
+      <div style={{ padding: '18px 16px 16px', borderBottom: '0.5px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 28, height: 28, background: '#2d7a45', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Leaf size={15} color="#a8e6be" />
@@ -36,69 +41,137 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
               SmartSeason
             </span>
           </div>
-        </div>
-
-        {/* Nav */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
-          {(['menu'] as const).map(section => (
-            <div key={section}>
-              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1, padding: '12px 8px 6px', fontWeight: 500 }}>
-                {section}
-              </p>
-              {NAV_ITEMS.filter(i => i.section === section).map(({ id, label, icon: Icon }) => {
-                const isActive = activePage === id;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => onNavigate(id)}
-                    style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 9,
-                      padding: '8px 10px', borderRadius: 8, marginBottom: 1,
-                      background: isActive ? '#2d7a45' : 'transparent',
-                      color: isActive ? '#fff' : 'rgba(255,255,255,0.45)',
-                      fontSize: 14.5, fontWeight: isActive ? 500 : 400,
-                      border: 'none', cursor: 'pointer', textAlign: 'left',
-                      fontFamily: "'DM Sans', sans-serif", transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <Icon size={15} />
-                    <span style={{ flex: 1 }}>{label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
-
-        {/* User + Logout */}
-        <div style={{ padding: '10px 8px', borderTop: '0.5px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', marginBottom: 3 }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#2d7a45', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, color: '#a8e6be', fontWeight: 600, flexShrink: 0 }}>
-              {user?.full_name ? initials(user.full_name) : 'A'}
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: 14, color: '#fff', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {user?.full_name || 'Agent'}
-              </p>
-              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>Field Agent</p>
-            </div>
-          </div>
+          {/* Close button — mobile only */}
           <button
-            onClick={onLogout}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, color: 'rgba(255,100,80,0.75)', fontSize: 14.5, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,80,60,0.1)'; e.currentTarget.style.color = '#ff6e5a'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,100,80,0.75)'; }}
+            onClick={() => setSidebarOpen(false)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', display: 'flex', padding: 4 }}
+            className="lg:hidden"
           >
-            <LogOut size={15} /> Logout
+            <X size={18} />
           </button>
         </div>
+      </div>
+
+      {/* Nav */}
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
+        <div>
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1, padding: '12px 8px 6px', fontWeight: 500 }}>
+            Menu
+          </p>
+          {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+            const isActive = activePage === id;
+            return (
+              <button
+                key={id}
+                onClick={() => handleNavigate(id)}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: 9,
+                  padding: '8px 10px', borderRadius: 8, marginBottom: 1,
+                  background: isActive ? '#2d7a45' : 'transparent',
+                  color: isActive ? '#fff' : 'rgba(255,255,255,0.45)',
+                  fontSize: 14.5, fontWeight: isActive ? 500 : 400,
+                  border: 'none', cursor: 'pointer', textAlign: 'left',
+                  fontFamily: "'DM Sans', sans-serif", transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+                onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+              >
+                <Icon size={15} />
+                <span style={{ flex: 1 }}>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* User + Logout */}
+      <div style={{ padding: '10px 8px', borderTop: '0.5px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', marginBottom: 3 }}>
+          <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#2d7a45', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, color: '#a8e6be', fontWeight: 600, flexShrink: 0 }}>
+            {user?.full_name ? initials(user.full_name) : 'A'}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <p style={{ fontSize: 14, color: '#fff', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {user?.full_name || 'Agent'}
+            </p>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Field Agent</p>
+          </div>
+        </div>
+        <button
+          onClick={onLogout}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, color: 'rgba(255,100,80,0.75)', fontSize: 14.5, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,80,60,0.1)'; e.currentTarget.style.color = '#ff6e5a'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,100,80,0.75)'; }}
+        >
+          <LogOut size={15} /> Logout
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#eef0eb', fontFamily: "'DM Sans', sans-serif" }}>
+
+      {/* ── DESKTOP SIDEBAR (hidden on mobile) ── */}
+      <aside
+        className="hidden lg:flex"
+        style={{ width: 200, flexShrink: 0, margin: 12, background: '#0f2e1a', borderRadius: 14, flexDirection: 'column', overflow: 'hidden' }}
+      >
+        <SidebarContent />
       </aside>
 
-      {/* ── CONTENT ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '12px 12px 12px 0' }}>
-        {children}
+      {/* ── MOBILE OVERLAY ── */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 40 }}
+          className="lg:hidden"
+        />
+      )}
+
+      {/* ── MOBILE SIDEBAR (drawer) ── */}
+      <aside
+        className="lg:hidden"
+        style={{
+          position: 'fixed', top: 0, left: 0, height: '100vh',
+          width: 220, background: '#0f2e1a',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          zIndex: 50,
+          transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.25s ease',
+        }}
+      >
+        <SidebarContent />
+      </aside>
+
+      {/* ── MAIN CONTENT ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+        {/* Mobile top bar */}
+        <div
+          className="lg:hidden"
+          style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: '#eef0eb' }}
+        >
+          <button
+            onClick={() => setSidebarOpen(true)}
+            style={{ background: '#0f2e1a', border: 'none', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Menu size={18} color="#fff" />
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <div style={{ width: 24, height: 24, background: '#2d7a45', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Leaf size={13} color="#a8e6be" />
+            </div>
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 15, fontWeight: 700, color: '#0f2e1a', letterSpacing: -0.3 }}>
+              SmartSeason
+            </span>
+          </div>
+        </div>
+
+        {/* Page content */}
+        <div style={{ flex: 1, overflow: 'hidden', padding: '0 12px 12px', paddingTop: 0 }} className="lg:pt-3 lg:pr-3 lg:pb-3 lg:pl-0">
+          {children}
+        </div>
       </div>
     </div>
   );

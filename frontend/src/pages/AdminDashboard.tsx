@@ -51,7 +51,6 @@ const AVATAR_COLORS = [
   { bg: '#f0f2ee', color: '#555555' },
 ];
 
-// Stat card accent colors
 const CARD_STYLES = [
   { bg: 'linear-gradient(135deg,#1d6b35,#2d9e54)', iconBg: 'rgba(255,255,255,0.2)', iconColor: '#fff', textColor: '#fff', subColor: 'rgba(255,255,255,0.75)' },
   { bg: 'linear-gradient(135deg,#1a4fa0,#2563eb)', iconBg: 'rgba(255,255,255,0.2)', iconColor: '#fff', textColor: '#fff', subColor: 'rgba(255,255,255,0.75)' },
@@ -162,26 +161,30 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
         <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 40 }} />
       )}
 
-      {/* ══ SIDEBAR ══ */}
+      {/* ══ SIDEBAR — now white ══ */}
       <aside style={{
         width: 240, flexShrink: 0, height: '100vh',
-        background: '#0f2e1a',
+        background: '#ffffff',
+        borderRight: '1px solid #e8ede8',
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
         position: isMobile ? 'fixed' : 'relative',
         top: 0, left: 0, zIndex: isMobile ? 50 : 'auto',
         transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
         transition: 'transform 0.25s ease',
-        boxShadow: isMobile && sidebarOpen ? '6px 0 30px rgba(0,0,0,0.3)' : 'none',
+        boxShadow: isMobile && sidebarOpen ? '6px 0 30px rgba(0,0,0,0.12)' : 'none',
       }}>
         {/* Logo */}
-        <div style={{ padding: '22px 20px 18px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+        <div style={{ padding: '22px 20px 18px', borderBottom: '1px solid #f0f4f0', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 34, height: 34, background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(45,122,69,0.4)', flexShrink: 0 }}>
+            <div style={{ width: 34, height: 34, background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(45,122,69,0.3)', flexShrink: 0 }}>
               <Leaf size={17} color="#a8e6be" />
             </div>
             <div>
-              <p style={{ fontFamily: "'Syne', sans-serif", fontSize: 14, fontWeight: 700, color: '#fff', letterSpacing: -0.4, lineHeight: 1 }}>SmartSeason</p>
-              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Field Management</p>
+              {/* "Smart" black, "Season" green */}
+              <p style={{ fontFamily: "'Syne', sans-serif", fontSize: 14, fontWeight: 700, letterSpacing: -0.4, lineHeight: 1, margin: 0 }}>
+                <span style={{ color: '#111' }}>Smart</span><span style={{ color: '#1d6b35' }}>Season</span>
+              </p>
+              <p style={{ fontSize: 10, color: '#9ca3af', marginTop: 2, margin: 0 }}>Field Management</p>
             </div>
           </div>
         </div>
@@ -190,20 +193,28 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
         <nav style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
           {(['menu', 'reports', 'system'] as const).map(section => (
             <div key={section} style={{ marginBottom: 8 }}>
-              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.22)', textTransform: 'uppercase', letterSpacing: 1.3, padding: '10px 8px 4px', fontWeight: 600 }}>{section}</p>
+              <p style={{ fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 1.3, padding: '10px 8px 4px', fontWeight: 600, margin: 0 }}>{section}</p>
               {NAV_ITEMS.filter(i => i.section === section).map(({ id, label, icon: Icon }) => {
                 const isActive = activePage === id;
                 const badge = id === 'fields' ? fields.length : id === 'agents' ? agentCount : undefined;
                 return (
                   <button key={id} onClick={() => handleNav(id)}
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderRadius: 8, marginBottom: 2, background: isActive ? '#2d7a45' : 'transparent', color: isActive ? '#fff' : 'rgba(255,255,255,0.45)', fontSize: 13, fontWeight: isActive ? 600 : 400, border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s', boxShadow: isActive ? '0 2px 10px rgba(0,0,0,0.25)' : 'none' }}
-                    onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}}
-                    onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; }}}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '9px 10px', borderRadius: 8, marginBottom: 2,
+                      background: isActive ? '#eef6f0' : 'transparent',
+                      color: isActive ? '#1d6b35' : '#6b7280',
+                      fontSize: 13, fontWeight: isActive ? 600 : 400,
+                      border: 'none', cursor: 'pointer', textAlign: 'left',
+                      fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = '#f9fafb'; e.currentTarget.style.color = '#374151'; }}}
+                    onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#6b7280'; }}}
                   >
                     <Icon size={16} />
                     <span style={{ flex: 1 }}>{label}</span>
                     {badge !== undefined && (
-                      <span style={{ background: isActive ? 'rgba(255,255,255,0.2)' : '#e85d3a', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 7px', borderRadius: 20 }}>{badge}</span>
+                      <span style={{ background: isActive ? '#1d6b35' : '#e85d3a', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 7px', borderRadius: 20 }}>{badge}</span>
                     )}
                   </button>
                 );
@@ -213,20 +224,20 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
         </nav>
 
         {/* User + Logout */}
-        <div style={{ padding: '12px 12px 16px', borderTop: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px', borderRadius: 9, background: 'rgba(255,255,255,0.05)', marginBottom: 6 }}>
+        <div style={{ padding: '12px 12px 16px', borderTop: '1px solid #f0f4f0', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px', borderRadius: 9, background: '#f9fafb', marginBottom: 6 }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#a8e6be', fontWeight: 700, flexShrink: 0 }}>
               {user?.full_name ? initials(user.full_name) : 'A'}
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <p style={{ fontSize: 12.5, color: '#fff', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.full_name || 'Admin'}</p>
-              <p style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.35)' }}>Administrator</p>
+              <p style={{ fontSize: 12.5, color: '#111', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>{user?.full_name || 'Admin'}</p>
+              <p style={{ fontSize: 10.5, color: '#9ca3af', margin: 0 }}>Administrator</p>
             </div>
           </div>
           <button onClick={onLogout}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderRadius: 8, color: 'rgba(255,100,80,0.7)', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,80,60,0.1)'; e.currentTarget.style.color = '#ff6e5a'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,100,80,0.7)'; }}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderRadius: 8, color: '#ef4444', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s', fontWeight: 500 }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
           >
             <LogOut size={15} /> Sign out
           </button>
@@ -246,12 +257,8 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
             >
               {isMobile && sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <div>
-              <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', lineHeight: 1 }}>Dashboard</h1>
-              <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>
-                {new Date().toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-              </p>
-            </div>
+            {/* Title only — date removed */}
+            <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', lineHeight: 1, margin: 0 }}>Dashboard</h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#f3f4f6', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}>
@@ -286,7 +293,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
             <Leaf size={isMobile ? 40 : 56} color="rgba(168,230,190,0.25)" />
           </div>
 
-          {/* STAT CARDS — 2x2 grid on mobile, 4 columns on desktop */}
+          {/* STAT CARDS */}
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: isMobile ? 10 : 16 }}>
             {STAT_CARDS.map(({ label, value, icon, trend, trendUp }, i) => {
               const style = CARD_STYLES[i];
@@ -308,7 +315,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
             })}
           </div>
 
-          {/* MIDDLE ROW — stack on mobile, side by side on desktop */}
+          {/* MIDDLE ROW */}
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0,2fr) minmax(260px,1fr)', gap: isMobile ? 14 : 16, alignItems: 'start' }}>
 
             {/* ALL FIELDS */}
@@ -338,8 +345,8 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
                     <MapPin size={15} color="#1d6b35" />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 13.5, fontWeight: 500, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{field.name}</p>
-                    <p style={{ fontSize: 11.5, color: '#9ca3af', marginTop: 2 }}>{field.crop_type}{field.location ? ` · ${field.location}` : ''}</p>
+                    <p style={{ fontSize: 13.5, fontWeight: 500, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>{field.name}</p>
+                    <p style={{ fontSize: 11.5, color: '#9ca3af', marginTop: 2, margin: 0 }}>{field.crop_type}{field.location ? ` · ${field.location}` : ''}</p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                     <StageBadge stage={field.current_stage} />
@@ -382,7 +389,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
                   <button onClick={() => onNavigate('agents')} style={{ fontSize: 12, color: '#1d6b35', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>View all</button>
                 </div>
                 {agentList.length === 0 ? (
-                  <p style={{ fontSize: 12, color: '#9ca3af', textAlign: 'center', padding: '8px 0' }}>No agents yet.</p>
+                  <p style={{ fontSize: 12, color: '#9ca3af', textAlign: 'center', padding: '8px 0', margin: 0 }}>No agents yet.</p>
                 ) : agentList.slice(0, 5).map((agent, idx) => {
                   const col = AVATAR_COLORS[idx % AVATAR_COLORS.length];
                   return (
@@ -391,8 +398,8 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
                         {initials(agent.full_name)}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 13, fontWeight: 500, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agent.full_name}</p>
-                        <p style={{ fontSize: 11, color: '#9ca3af' }}>Field Agent</p>
+                        <p style={{ fontSize: 13, fontWeight: 500, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>{agent.full_name}</p>
+                        <p style={{ fontSize: 11, color: '#9ca3af', margin: 0 }}>Field Agent</p>
                       </div>
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
                     </div>
@@ -422,13 +429,13 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
                   <div key={update.id} style={{ display: 'flex', gap: 12, padding: '14px 18px', borderBottom: '1px solid #f9fafb', borderRight: '1px solid #f9fafb' }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: update.status === 'at_risk' ? '#ef4444' : '#22c55e', flexShrink: 0, marginTop: 6 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 13, color: '#374151', lineHeight: 1.5 }}>
+                      <p style={{ fontSize: 13, color: '#374151', lineHeight: 1.5, margin: 0 }}>
                         <strong style={{ color: '#1d6b35' }}>{update.agent_name}</strong>{' updated '}
                         <span style={{ fontWeight: 500 }}>{update.field_name}</span>{' → '}
                         <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{update.stage}</span>
                       </p>
-                      {update.notes && <p style={{ fontSize: 11.5, color: '#9ca3af', marginTop: 3, fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>"{update.notes}"</p>}
-                      <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>{timeAgo(update.created_at)}</p>
+                      {update.notes && <p style={{ fontSize: 11.5, color: '#9ca3af', marginTop: 3, fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>"{update.notes}"</p>}
+                      <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 4, margin: 0 }}>{timeAgo(update.created_at)}</p>
                     </div>
                   </div>
                 ))}

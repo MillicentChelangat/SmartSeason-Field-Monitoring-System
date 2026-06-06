@@ -3,7 +3,7 @@ import {
   Leaf, LayoutDashboard, MapPin, Users, AlertTriangle,
   CheckCircle2, Activity, TrendingUp, BarChart2,
   FileText, Settings, HelpCircle, LogOut, Download,
-  Plus, Menu, X, Bell, ChevronRight, Circle
+  Plus, Menu, X, Bell, ChevronRight,
 } from 'lucide-react';
 import API from '../api/api.ts';
 import type { Field, FieldUpdate, Profile } from '../types/database';
@@ -17,12 +17,10 @@ interface FieldWithStatus extends Field {
   lastUpdate?: FieldUpdate | null;
   assignedAgents: Profile[];
 }
-
 interface EnrichedUpdate extends FieldUpdate {
   field_name: string;
   agent_name: string;
 }
-
 interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
@@ -45,7 +43,6 @@ const STAGE_COLORS: Record<string, string> = {
   ready:     '#2d7a45',
   harvested: '#888888',
 };
-
 const AVATAR_COLORS = [
   { bg: '#e8f0fb', color: '#1a5ac2' },
   { bg: '#e8f5ee', color: '#1d6b35' },
@@ -57,14 +54,13 @@ const AVATAR_COLORS = [
 function initials(name: string) {
   return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
 }
-
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  const hrs = Math.floor(mins / 60);
+  const hrs  = Math.floor(mins / 60);
   const days = Math.floor(hrs / 24);
   if (days > 0) return `${days}d ago`;
-  if (hrs > 0) return `${hrs}h ago`;
+  if (hrs  > 0) return `${hrs}h ago`;
   if (mins > 0) return `${mins}m ago`;
   return 'just now';
 }
@@ -77,6 +73,13 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
   const [loading, setLoading]             = useState(true);
   const [activePage, setActivePage]       = useState('dashboard');
   const [sidebarOpen, setSidebarOpen]     = useState(false);
+  const [isMobile, setIsMobile]           = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -95,7 +98,6 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
           const lastUpdate   = fieldUpdates[0] ?? null;
           return { ...field, status: computeFieldStatus(field, lastUpdate), lastUpdate, assignedAgents: [] };
         });
-
         const enrichedUpdates: EnrichedUpdate[] = allUpdates.map(update => {
           const field = rawFields.find(f => f.id === update.field_id);
           const agent = agents.find(a => a.user_id === update.agent_id);
@@ -105,7 +107,6 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
             agent_name: update.agent_name ?? agent?.full_name ?? 'Unknown Agent',
           };
         });
-
         setFields(enriched);
         setRecentUpdates(enrichedUpdates);
         setAgentCount(agents.length);
@@ -121,7 +122,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f0f2ef' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f3f4f6' }}>
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -129,8 +130,6 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
 
   const atRisk    = fields.filter(f => f.status === 'at_risk').length;
   const completed = fields.filter(f => f.status === 'completed').length;
-  const active    = fields.filter(f => f.status === 'active').length;
-
   const stageBreakdown = {
     planted:   fields.filter(f => f.current_stage === 'planted').length,
     growing:   fields.filter(f => f.current_stage === 'growing').length,
@@ -146,79 +145,71 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
   }
 
   const STAT_CARDS = [
-    {
-      label: 'Total Fields', value: fields.length,
-      icon: <MapPin size={16} />, iconBg: '#dcfce7', iconColor: '#16a34a',
-      trend: '+2 this season', trendUp: true,
-    },
-    {
-      label: 'Field Agents', value: agentCount,
-      icon: <Users size={16} />, iconBg: '#dbeafe', iconColor: '#2563eb',
-      trend: `${agentCount} active`, trendUp: null,
-    },
-    {
-      label: 'At Risk', value: atRisk,
-      icon: <AlertTriangle size={16} />, iconBg: '#fef3c7', iconColor: '#d97706',
-      trend: atRisk > 0 ? 'Needs attention' : 'All clear', trendUp: atRisk === 0,
-    },
-    {
-      label: 'Completed', value: completed,
-      icon: <CheckCircle2 size={16} />, iconBg: '#f1f5f9', iconColor: '#64748b',
-      trend: 'Ready to harvest', trendUp: null,
-    },
+    { label: 'Total Fields', value: fields.length,  icon: <MapPin size={18} />,        iconBg: '#dcfce7', iconColor: '#16a34a', trend: '+2 this season',           trendUp: true  },
+    { label: 'Field Agents', value: agentCount,      icon: <Users size={18} />,         iconBg: '#dbeafe', iconColor: '#2563eb', trend: `${agentCount} active`,     trendUp: null  },
+    { label: 'At Risk',      value: atRisk,           icon: <AlertTriangle size={18} />, iconBg: '#fef3c7', iconColor: '#d97706', trend: atRisk > 0 ? 'Needs attention' : 'All clear', trendUp: atRisk === 0 },
+    { label: 'Completed',    value: completed,        icon: <CheckCircle2 size={18} />,  iconBg: '#f1f5f9', iconColor: '#64748b', trend: 'Ready to harvest',         trendUp: null  },
   ];
 
+  // ─── LAYOUT ───────────────────────────────────────────────
+  // Outer: flex row, full viewport height, no overflow
+  // Sidebar: fixed height, its own scroll
+  // Main: flex-1, overflow-y: auto — THIS is what scrolls
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f0f2ef', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{
+      display: 'flex',
+      height: '100vh',          // exact viewport — nothing more
+      overflow: 'hidden',       // prevent body scroll
+      background: '#f3f4f6',
+      fontFamily: "'DM Sans', sans-serif",
+    }}>
 
       {/* ── MOBILE OVERLAY ── */}
-      {sidebarOpen && (
+      {isMobile && sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 40 }}
         />
       )}
 
-      {/* ── SIDEBAR ── */}
+      {/* ══════════════════════════════
+           SIDEBAR — fixed left column
+         ══════════════════════════════ */}
       <aside style={{
-        width: 220,
+        width: 240,
         flexShrink: 0,
+        height: '100vh',
         background: '#0f2e1a',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        position: window.innerWidth < 768 ? 'fixed' : 'sticky',
-        top: 0,
-        left: 0,
-        height: '100vh',
-        zIndex: 50,
-        transform: window.innerWidth < 768 ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'none',
+        // On mobile: slide in from left as an overlay
+        position: isMobile ? 'fixed' : 'relative',
+        top: 0, left: 0,
+        zIndex: isMobile ? 50 : 'auto',
+        transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
         transition: 'transform 0.25s ease',
+        boxShadow: isMobile && sidebarOpen ? '4px 0 24px rgba(0,0,0,0.3)' : 'none',
       }}>
+
         {/* Logo */}
-        <div style={{ padding: '20px 18px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-              <div style={{ width: 30, height: 30, background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(45,122,69,0.4)' }}>
-                <Leaf size={15} color="#a8e6be" />
-              </div>
-              <div>
-                <p style={{ fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 700, color: '#fff', letterSpacing: -0.3, lineHeight: 1 }}>SmartSeason</p>
-                <p style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>Field Management</p>
-              </div>
+        <div style={{ padding: '22px 20px 18px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 34, height: 34, background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(45,122,69,0.4)', flexShrink: 0 }}>
+              <Leaf size={17} color="#a8e6be" />
             </div>
-            {/* Close button on mobile */}
-            <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: 2, display: window.innerWidth < 768 ? 'flex' : 'none' }}>
-              <X size={16} />
-            </button>
+            <div>
+              <p style={{ fontFamily: "'Syne', sans-serif", fontSize: 14, fontWeight: 700, color: '#fff', letterSpacing: -0.4, lineHeight: 1 }}>SmartSeason</p>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Field Management</p>
+            </div>
           </div>
         </div>
 
-        {/* Nav */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '10px 10px' }}>
+        {/* Nav — scrollable */}
+        <nav style={{ flex: 1, overflowY: 'auto', padding: '12px 12px' }}>
           {(['menu', 'reports', 'system'] as const).map(section => (
-            <div key={section} style={{ marginBottom: 4 }}>
-              <p style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: 1.2, padding: '10px 8px 5px', fontWeight: 600 }}>
+            <div key={section} style={{ marginBottom: 8 }}>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.22)', textTransform: 'uppercase', letterSpacing: 1.3, padding: '10px 8px 4px', fontWeight: 600 }}>
                 {section}
               </p>
               {NAV_ITEMS.filter(i => i.section === section).map(({ id, label, icon: Icon }) => {
@@ -229,23 +220,23 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
                     key={id}
                     onClick={() => handleNav(id)}
                     style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 9,
-                      padding: '8px 10px', borderRadius: 8, marginBottom: 2,
-                      background: isActive ? 'rgba(45,122,69,0.9)' : 'transparent',
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '9px 10px', borderRadius: 8, marginBottom: 2,
+                      background: isActive ? '#2d7a45' : 'transparent',
                       color: isActive ? '#fff' : 'rgba(255,255,255,0.45)',
                       fontSize: 13, fontWeight: isActive ? 600 : 400,
                       border: 'none', cursor: 'pointer', textAlign: 'left',
                       fontFamily: "'DM Sans', sans-serif",
                       transition: 'all 0.15s',
-                      boxShadow: isActive ? '0 2px 8px rgba(0,0,0,0.2)' : 'none',
+                      boxShadow: isActive ? '0 2px 10px rgba(0,0,0,0.25)' : 'none',
                     }}
-                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = isActive ? '#fff' : 'rgba(255,255,255,0.75)'; }}
-                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = isActive ? '#fff' : 'rgba(255,255,255,0.45)'; }}
+                    onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; } }}
+                    onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; } }}
                   >
-                    <Icon size={15} />
+                    <Icon size={16} />
                     <span style={{ flex: 1 }}>{label}</span>
                     {badge !== undefined && (
-                      <span style={{ background: isActive ? 'rgba(255,255,255,0.2)' : '#e85d3a', color: '#fff', fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 10, minWidth: 18, textAlign: 'center' }}>
+                      <span style={{ background: isActive ? 'rgba(255,255,255,0.2)' : '#e85d3a', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 7px', borderRadius: 20 }}>
                         {badge}
                       </span>
                     )}
@@ -257,199 +248,202 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
         </nav>
 
         {/* User + Logout */}
-        <div style={{ padding: '10px 10px 14px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', marginBottom: 4 }}>
-            <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#a8e6be', fontWeight: 700, flexShrink: 0 }}>
+        <div style={{ padding: '12px 12px 16px', borderTop: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 10px', borderRadius: 9, background: 'rgba(255,255,255,0.05)', marginBottom: 6 }}>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#a8e6be', fontWeight: 700, flexShrink: 0 }}>
               {user?.full_name ? initials(user.full_name) : 'A'}
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <p style={{ fontSize: 12, color: '#fff', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {user?.full_name || 'Admin User'}
-              </p>
-              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>Administrator</p>
+              <p style={{ fontSize: 12.5, color: '#fff', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.full_name || 'Admin'}</p>
+              <p style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.35)' }}>Administrator</p>
             </div>
           </div>
           <button
             onClick={onLogout}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, color: 'rgba(255,100,80,0.7)', fontSize: 12.5, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s' }}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderRadius: 8, color: 'rgba(255,100,80,0.7)', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,80,60,0.1)'; e.currentTarget.style.color = '#ff6e5a'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,100,80,0.7)'; }}
           >
-            <LogOut size={15} />
-            Sign out
+            <LogOut size={15} /> Sign out
           </button>
         </div>
       </aside>
 
-      {/* ── MAIN CONTENT ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      {/* ══════════════════════════════
+           MAIN — this is what scrolls
+         ══════════════════════════════ */}
+      <div style={{
+        flex: 1,
+        minWidth: 0,
+        height: '100vh',
+        overflowY: 'auto',      // ← ONLY this scrolls
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
 
-        {/* ── TOPBAR ── */}
-        <header style={{ background: '#fff', borderBottom: '1px solid #eaeceb', padding: '0 20px', height: 58, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, position: 'sticky', top: 0, zIndex: 30 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Hamburger on mobile */}
+        {/* TOPBAR — sticky inside the scroll container */}
+        <header style={{
+          position: 'sticky', top: 0, zIndex: 30,
+          background: '#fff',
+          borderBottom: '1px solid #e5e7eb',
+          padding: '0 24px',
+          height: 64,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button
-              onClick={() => setSidebarOpen(true)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', padding: 4, display: 'flex', alignItems: 'center' }}
-              className="md:hidden"
+              onClick={() => setSidebarOpen(prev => !prev)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', padding: 6, display: 'flex', alignItems: 'center', borderRadius: 7, transition: 'background 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}
             >
-              <Menu size={20} />
+              {isMobile && sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <div>
-              <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 15, fontWeight: 700, color: '#111', lineHeight: 1 }}>Dashboard</h1>
-              <p style={{ fontSize: 11, color: '#999', marginTop: 2 }}>
-                {new Date().toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long' })}
+              <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', lineHeight: 1 }}>Dashboard</h1>
+              <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>
+                {new Date().toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Notification bell */}
-            <button style={{ position: 'relative', width: 34, height: 34, borderRadius: 8, background: '#f5f6f4', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
-              <Bell size={15} />
-              {atRisk > 0 && (
-                <span style={{ position: 'absolute', top: 6, right: 6, width: 7, height: 7, borderRadius: '50%', background: '#e85d3a', border: '1.5px solid #fff' }} />
-              )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#f3f4f6', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}>
+              <Bell size={16} />
+              {atRisk > 0 && <span style={{ position: 'absolute', top: 7, right: 7, width: 7, height: 7, borderRadius: '50%', background: '#ef4444', border: '1.5px solid #fff' }} />}
             </button>
-            <button
-              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 13px', borderRadius: 8, background: '#f5f6f4', border: 'none', fontSize: 12, fontWeight: 500, cursor: 'pointer', color: '#555', fontFamily: "'DM Sans', sans-serif" }}
-            >
-              <Download size={12} />
-              <span style={{ display: window.innerWidth < 480 ? 'none' : 'inline' }}>Export</span>
+            <button style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, background: '#f3f4f6', border: 'none', fontSize: 13, fontWeight: 500, cursor: 'pointer', color: '#374151', fontFamily: "'DM Sans', sans-serif" }}>
+              <Download size={14} /> Export
             </button>
             <button
               onClick={() => onNavigate('fields')}
-              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 13px', borderRadius: 8, background: '#1d6b35', color: '#fff', border: 'none', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: '#1d6b35', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
             >
-              <Plus size={12} />
-              <span style={{ display: window.innerWidth < 480 ? 'none' : 'inline' }}>Add Field</span>
+              <Plus size={14} /> Add Field
             </button>
           </div>
         </header>
 
-        {/* ── SCROLLABLE BODY ── */}
-        <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* ── PAGE CONTENT — grows naturally, no height restrictions ── */}
+        <main style={{ padding: '28px 24px 40px', display: 'flex', flexDirection: 'column', gap: 24, flex: 1 }}>
 
-          {/* ── STAT CARDS ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+          {/* STAT CARDS */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             {STAT_CARDS.map(({ label, value, icon, iconBg, iconColor, trend, trendUp }) => (
               <div
                 key={label}
-                style={{ background: '#fff', borderRadius: 12, padding: '16px', border: '1px solid #eaeceb', transition: 'transform 0.18s, box-shadow 0.18s', cursor: 'default' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.07)'; }}
+                style={{ background: '#fff', borderRadius: 14, padding: '20px 22px', border: '1px solid #e5e7eb', transition: 'transform 0.18s, box-shadow 0.18s' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <span style={{ fontSize: 11, fontWeight: 500, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</span>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: iconColor }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.6 }}>{label}</span>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: iconColor }}>
                     {icon}
                   </div>
                 </div>
-                <p style={{ fontFamily: "'Syne', sans-serif", fontSize: 28, fontWeight: 700, color: '#111', lineHeight: 1, marginBottom: 6 }}>{value}</p>
-                <p style={{ fontSize: 11, color: trendUp === true ? '#16a34a' : trendUp === false ? '#e85d3a' : '#999' }}>
+                <p style={{ fontFamily: "'Syne', sans-serif", fontSize: 32, fontWeight: 700, color: '#111', lineHeight: 1, marginBottom: 8 }}>{value}</p>
+                <p style={{ fontSize: 12, color: trendUp === true ? '#16a34a' : trendUp === false ? '#ef4444' : '#9ca3af' }}>
                   {trendUp === true ? '↑ ' : trendUp === false ? '↓ ' : ''}{trend}
                 </p>
               </div>
             ))}
           </div>
 
-          {/* ── MIDDLE ROW: Fields table + Stage chart ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(200px,1fr)', gap: 12 }}>
+          {/* MIDDLE ROW */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(260px, 1fr)', gap: 16, alignItems: 'start' }}>
 
-            {/* Fields Table */}
-            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #eaeceb', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid #f0f2ee' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <MapPin size={14} color="#1d6b35" />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>All Fields</span>
-                  <span style={{ fontSize: 11, background: '#f0f2ee', color: '#666', padding: '1px 7px', borderRadius: 10, fontWeight: 500 }}>{fields.length}</span>
+            {/* ALL FIELDS TABLE */}
+            <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #f3f4f6' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <MapPin size={15} color="#1d6b35" />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>All Fields</span>
+                  <span style={{ fontSize: 11.5, background: '#f3f4f6', color: '#6b7280', padding: '2px 8px', borderRadius: 20, fontWeight: 500 }}>{fields.length}</span>
                 </div>
-                <button onClick={() => onNavigate('fields')} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, color: '#1d6b35', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+                <button onClick={() => onNavigate('fields')} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12.5, color: '#1d6b35', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
                   Manage <ChevronRight size={13} />
                 </button>
               </div>
-              <div style={{ flex: 1 }}>
-                {fields.length === 0 ? (
-                  <div style={{ padding: 32, textAlign: 'center', fontSize: 12, color: '#bbb' }}>
-                    <MapPin size={28} style={{ opacity: 0.2, margin: '0 auto 8px', display: 'block' }} />
-                    No fields yet
+              {fields.length === 0 ? (
+                <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+                  <MapPin size={32} style={{ color: '#d1d5db', margin: '0 auto 10px', display: 'block' }} />
+                  <p style={{ fontSize: 13, color: '#9ca3af' }}>No fields yet. Add your first field.</p>
+                </div>
+              ) : fields.map((field, idx) => (
+                <button
+                  key={field.id}
+                  onClick={() => onNavigate('field-detail', String(field.id))}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 20px',
+                    borderBottom: idx < fields.length - 1 ? '1px solid #f9fafb' : 'none',
+                    background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left',
+                    fontFamily: "'DM Sans', sans-serif", transition: 'background 0.12s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: '#f0f7f2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <MapPin size={15} color="#1d6b35" />
                   </div>
-                ) : fields.map((field, idx) => (
-                  <button
-                    key={field.id}
-                    onClick={() => onNavigate('field-detail', String(field.id))}
-                    style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
-                      borderBottom: idx < fields.length - 1 ? '1px solid #f8f9f7' : 'none',
-                      background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left',
-                      fontFamily: "'DM Sans', sans-serif", transition: 'background 0.12s',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = '#fafbf9'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <div style={{ width: 34, height: 34, borderRadius: 9, background: '#f0f7f2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <MapPin size={14} color="#1d6b35" />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 13, fontWeight: 500, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{field.name}</p>
-                      <p style={{ fontSize: 11, color: '#999', marginTop: 1 }}>{field.crop_type}{field.location ? ` · ${field.location}` : ''}</p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
-                      <StageBadge stage={field.current_stage} />
-                      <StatusBadge status={field.status} />
-                    </div>
-                  </button>
-                ))}
-              </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 13.5, fontWeight: 500, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{field.name}</p>
+                    <p style={{ fontSize: 11.5, color: '#9ca3af', marginTop: 2 }}>{field.crop_type}{field.location ? ` · ${field.location}` : ''}</p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <StageBadge stage={field.current_stage} />
+                    <StatusBadge status={field.status} />
+                  </div>
+                </button>
+              ))}
             </div>
 
-            {/* Right column — Stage chart + agents */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* RIGHT COLUMN */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-              {/* Stage Distribution */}
-              <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #eaeceb', padding: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
-                  <TrendingUp size={14} color="#1d6b35" />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>Stage Distribution</span>
+              {/* STAGE DISTRIBUTION */}
+              <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb', padding: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                  <TrendingUp size={15} color="#1d6b35" />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>Stage Distribution</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
                   <DonutChart data={stageBreakdown} total={stageTotal} colors={STAGE_COLORS} />
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   {Object.entries(stageBreakdown).map(([stage, count]) => (
-                    <div key={stage} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#555' }}>
-                      <div style={{ width: 8, height: 8, borderRadius: 2, background: STAGE_COLORS[stage], flexShrink: 0 }} />
-                      <span style={{ textTransform: 'capitalize' }}>{stage}</span>
-                      <span style={{ fontWeight: 600, color: '#111', marginLeft: 'auto' }}>{count}</span>
+                    <div key={stage} style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: '#6b7280' }}>
+                      <div style={{ width: 9, height: 9, borderRadius: 3, background: STAGE_COLORS[stage], flexShrink: 0 }} />
+                      <span style={{ textTransform: 'capitalize', flex: 1 }}>{stage}</span>
+                      <span style={{ fontWeight: 600, color: '#111' }}>{count}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Active Agents */}
-              <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #eaeceb', padding: 16, flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Users size={14} color="#1d6b35" />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>Agents</span>
+              {/* AGENTS */}
+              <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb', padding: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Users size={15} color="#1d6b35" />
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>Active Agents</span>
                   </div>
-                  <button onClick={() => onNavigate('agents')} style={{ fontSize: 11.5, color: '#1d6b35', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-                    View all
-                  </button>
+                  <button onClick={() => onNavigate('agents')} style={{ fontSize: 12, color: '#1d6b35', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>View all</button>
                 </div>
                 {agentList.length === 0 ? (
-                  <p style={{ fontSize: 11, color: '#bbb', textAlign: 'center', padding: '8px 0' }}>No agents yet.</p>
-                ) : agentList.slice(0, 5).map((agent, idx) => {
+                  <p style={{ fontSize: 12, color: '#9ca3af', textAlign: 'center', padding: '8px 0' }}>No agents yet.</p>
+                ) : agentList.slice(0, 6).map((agent, idx) => {
                   const col = AVATAR_COLORS[idx % AVATAR_COLORS.length];
                   return (
-                    <div key={agent.user_id} style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: idx < agentList.length - 1 ? 10 : 0 }}>
-                      <div style={{ width: 30, height: 30, borderRadius: '50%', background: col.bg, color: col.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10.5, fontWeight: 700, flexShrink: 0 }}>
+                    <div key={agent.user_id} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: idx < Math.min(agentList.length, 6) - 1 ? 12 : 0 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: '50%', background: col.bg, color: col.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
                         {initials(agent.full_name)}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 12.5, fontWeight: 500, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agent.full_name}</p>
-                        <p style={{ fontSize: 10.5, color: '#999' }}>Field Agent</p>
+                        <p style={{ fontSize: 13, fontWeight: 500, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agent.full_name}</p>
+                        <p style={{ fontSize: 11, color: '#9ca3af' }}>Field Agent</p>
                       </div>
-                      <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
                     </div>
                   );
                 })}
@@ -457,39 +451,37 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
             </div>
           </div>
 
-          {/* ── RECENT ACTIVITY ── */}
-          <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #eaeceb', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid #f0f2ee' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <Activity size={14} color="#1d6b35" />
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>Recent Activity</span>
+          {/* RECENT ACTIVITY */}
+          <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #f3f4f6' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Activity size={15} color="#1d6b35" />
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>Recent Activity</span>
               </div>
-              <button style={{ fontSize: 12, color: '#1d6b35', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-                View all
-              </button>
+              <button style={{ fontSize: 12.5, color: '#1d6b35', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>View all</button>
             </div>
             {recentUpdates.length === 0 ? (
-              <div style={{ padding: 28, textAlign: 'center', fontSize: 12, color: '#bbb' }}>No activity recorded yet.</div>
+              <div style={{ padding: '40px 24px', textAlign: 'center' }}>
+                <Activity size={28} style={{ color: '#d1d5db', margin: '0 auto 10px', display: 'block' }} />
+                <p style={{ fontSize: 13, color: '#9ca3af' }}>No activity recorded yet.</p>
+              </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
                 {recentUpdates.slice(0, 6).map((update, idx) => (
-                  <div
-                    key={update.id}
-                    style={{ display: 'flex', gap: 10, padding: '12px 16px', borderBottom: '1px solid #f8f9f7', borderRight: '1px solid #f8f9f7' }}
-                  >
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: update.status === 'at_risk' ? '#e85d3a' : '#22c55e', flexShrink: 0, marginTop: 5 }} />
+                  <div key={update.id} style={{ display: 'flex', gap: 12, padding: '14px 20px', borderBottom: '1px solid #f9fafb', borderRight: '1px solid #f9fafb' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: update.status === 'at_risk' ? '#ef4444' : '#22c55e', flexShrink: 0, marginTop: 6 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 12, color: '#333', lineHeight: 1.5 }}>
+                      <p style={{ fontSize: 13, color: '#374151', lineHeight: 1.5 }}>
                         <strong style={{ color: '#1d6b35' }}>{update.agent_name}</strong>
                         {' updated '}
                         <span style={{ fontWeight: 500 }}>{update.field_name}</span>
                         {' → '}
-                        <span style={{ textTransform: 'capitalize', fontWeight: 500, color: '#555' }}>{update.stage}</span>
+                        <span style={{ textTransform: 'capitalize', fontWeight: 600, color: '#374151' }}>{update.stage}</span>
                       </p>
                       {update.notes && (
-                        <p style={{ fontSize: 11, color: '#bbb', marginTop: 3, fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>"{update.notes}"</p>
+                        <p style={{ fontSize: 11.5, color: '#9ca3af', marginTop: 3, fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>"{update.notes}"</p>
                       )}
-                      <p style={{ fontSize: 10.5, color: '#bbb', marginTop: 3 }}>{timeAgo(update.created_at)}</p>
+                      <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>{timeAgo(update.created_at)}</p>
                     </div>
                   </div>
                 ))}
@@ -497,15 +489,15 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
             )}
           </div>
 
-        </div>
+        </main>
       </div>
     </div>
   );
 }
 
-/* ── Donut Chart (pure SVG) ── */
+/* ── Donut Chart ── */
 function DonutChart({ data, total, colors }: { data: Record<string, number>; total: number; colors: Record<string, string> }) {
-  const cx = 55, cy = 55, r = 44, ir = 30;
+  const cx = 60, cy = 60, r = 50, ir = 34;
   let startAngle = -Math.PI / 2;
   const slices = Object.entries(data).map(([key, val]) => {
     const angle = total ? (val / total) * Math.PI * 2 : 0;
@@ -518,16 +510,15 @@ function DonutChart({ data, total, colors }: { data: Record<string, number>; tot
     startAngle += angle;
     return { key, path, color: colors[key] };
   });
-
   return (
-    <svg width="110" height="110" viewBox="0 0 110 110">
+    <svg width="120" height="120" viewBox="0 0 120 120">
       {total === 0
-        ? <circle cx={cx} cy={cy} r={r} fill="#f0f2ee" />
+        ? <circle cx={cx} cy={cy} r={r} fill="#f3f4f6" />
         : slices.map(s => <path key={s.key} d={s.path} fill={s.color} />)
       }
       <circle cx={cx} cy={cy} r={ir} fill="#fff" />
-      <text x={cx} y={cy - 5} textAnchor="middle" dominantBaseline="middle" style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, fill: '#111' }}>{total}</text>
-      <text x={cx} y={cy + 10} textAnchor="middle" dominantBaseline="middle" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fill: '#999' }}>fields</text>
+      <text x={cx} y={cy - 6} textAnchor="middle" dominantBaseline="middle" style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, fontWeight: 700, fill: '#111' }}>{total}</text>
+      <text x={cx} y={cy + 10} textAnchor="middle" dominantBaseline="middle" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fill: '#9ca3af' }}>fields</text>
     </svg>
   );
 }

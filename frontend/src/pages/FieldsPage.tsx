@@ -103,10 +103,10 @@ export function FieldsPage({ onNavigate, onLogout, user }: Props) {
   });
 
   const stageCounts = {
-    all: fields.length,
-    planted: fields.filter(f => f.current_stage === 'planted').length,
-    growing: fields.filter(f => f.current_stage === 'growing').length,
-    ready: fields.filter(f => f.current_stage === 'ready').length,
+    all:       fields.length,
+    planted:   fields.filter(f => f.current_stage === 'planted').length,
+    growing:   fields.filter(f => f.current_stage === 'growing').length,
+    ready:     fields.filter(f => f.current_stage === 'ready').length,
     harvested: fields.filter(f => f.current_stage === 'harvested').length,
   };
 
@@ -121,194 +121,317 @@ export function FieldsPage({ onNavigate, onLogout, user }: Props) {
   return (
     <AdminShell activePage="fields" onNavigate={onNavigate} onLogout={onLogout} user={user}>
 
-      {/* Topbar */}
-      <div style={{ background: '#fff', borderRadius: 12, padding: '0 18px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, marginBottom: 10 }}>
+      {/* ── TOPBAR ── */}
+      <div style={{
+        background: '#fff', borderRadius: 12,
+        padding: '0 20px', height: 60,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexShrink: 0, marginBottom: 14,
+        borderBottom: '1px solid #f0f2ee',
+      }}>
         <div>
-          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111' }}>Fields</h1>
-          <p style={{ fontSize: 11, color: '#888', marginTop: 1 }}>{fields.length} fields total</p>
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', margin: 0 }}>Fields</h1>
+          <p style={{ fontSize: 11.5, color: '#9ca3af', margin: 0, marginTop: 2 }}>{fields.length} fields total</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 7, background: '#1d6b35', color: '#fff', border: 'none', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '8px 16px', borderRadius: 8,
+            background: '#1d6b35', color: '#fff',
+            border: 'none', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+          }}
         >
-          <Plus size={13} /> New Field
+          <Plus size={14} /> New Field
         </button>
       </div>
 
-      {/* Body */}
-      <div style={{ flex: 1, display: 'flex', gap: 10, minHeight: 0 }}>
+      {/* ── BODY ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
 
-        {/* Main panel */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 0 }}>
-
-          {/* Filter tabs + Search */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {/* Filter tabs + Search row */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: 12, flexShrink: 0, flexWrap: 'wrap',
+        }}>
+          {/* Stage pill tabs in a contained bar */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            background: '#fff', borderRadius: 10, padding: '4px',
+            border: '1px solid #f0f2ee',
+          }}>
             {(['all', 'planted', 'growing', 'ready', 'harvested'] as const).map(stage => (
               <button
                 key={stage}
                 onClick={() => setFilterStage(stage)}
                 style={{
-                  padding: '5px 12px', borderRadius: 20, fontSize: 11.5, fontWeight: 500, cursor: 'pointer', border: 'none',
-                  background: filterStage === stage ? '#1d6b35' : '#fff',
-                  color: filterStage === stage ? '#fff' : '#555',
+                  padding: '5px 13px', borderRadius: 7,
+                  fontSize: 12, fontWeight: filterStage === stage ? 600 : 400,
+                  cursor: 'pointer', border: 'none',
+                  background: filterStage === stage ? '#1d6b35' : 'transparent',
+                  color: filterStage === stage ? '#fff' : '#6b7280',
                   fontFamily: "'DM Sans', sans-serif",
+                  transition: 'all 0.15s',
                 }}
               >
-                {stage.charAt(0).toUpperCase() + stage.slice(1)} ({stageCounts[stage]})
+                {stage.charAt(0).toUpperCase() + stage.slice(1)}
+                <span style={{
+                  marginLeft: 5, fontSize: 10.5,
+                  opacity: filterStage === stage ? 0.8 : 0.6,
+                }}>
+                  {stageCounts[stage]}
+                </span>
               </button>
             ))}
-            <div style={{ flex: 1 }} />
-            <div style={{ position: 'relative' }}>
-              <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: '#aaa' }} />
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search fields..."
-                style={{ paddingLeft: 28, paddingRight: 12, paddingTop: 7, paddingBottom: 7, borderRadius: 8, border: '0.5px solid #ddd', fontSize: 12, background: '#fff', fontFamily: "'DM Sans', sans-serif", outline: 'none', width: 200 }}
-              />
-            </div>
           </div>
 
-          {/* Fields list */}
-          <div style={{ flex: 1, background: '#fff', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div style={{ overflowY: 'auto', flex: 1 }}>
-              {filtered.length === 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#aaa' }}>
-                  <MapPin size={32} style={{ opacity: 0.2, marginBottom: 8 }} />
-                  <p style={{ fontSize: 13 }}>No fields found</p>
-                </div>
-              ) : (
-                filtered.map((field, idx) => {
-                  const stageStyle = STAGE_COLORS[field.current_stage] ?? { bg: '#f1f5f9', color: '#475569' };
-                  const agentName = field.assigned_agent_id
-                    ? agents.find(a => a.user_id === field.assigned_agent_id)?.full_name ?? 'Assigned'
-                    : null;
-                  return (
-                    <div key={field.id}>
-                      <div
-                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', borderBottom: idx < filtered.length - 1 ? '0.5px solid #f0f2ee' : 'none' }}
-                      >
-                        {/* Stage colour dot */}
-                        <div style={{ width: 36, height: 36, borderRadius: 9, background: stageStyle.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <MapPin size={16} color={stageStyle.color} />
-                        </div>
+          {/* Search */}
+          <div style={{ position: 'relative' }}>
+            <Search size={13} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search fields..."
+              style={{
+                paddingLeft: 32, paddingRight: 14,
+                paddingTop: 8, paddingBottom: 8,
+                borderRadius: 9, border: '1px solid #e8ede8',
+                fontSize: 12.5, background: '#fff',
+                fontFamily: "'DM Sans', sans-serif",
+                outline: 'none', width: 210,
+                color: '#111',
+              }}
+            />
+          </div>
+        </div>
 
-                        {/* Info */}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{field.name}</p>
-                          <p style={{ fontSize: 11, color: '#888', marginTop: 1 }}>
-                            {field.crop_type}
-                            {field.location ? ` · ${field.location}` : ''}
-                            {agentName ? ` · ${agentName}` : ' · Unassigned'}
-                          </p>
-                        </div>
+        {/* Fields list card */}
+        <div style={{
+          flex: 1, background: '#fff', borderRadius: 12,
+          border: '1px solid #e8ede8',
+          overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0,
+        }}>
+          {/* Table column headers */}
+          {filtered.length > 0 && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '40px 1fr 160px 120px',
+              gap: 8, padding: '9px 18px',
+              borderBottom: '1px solid #f3f4f6',
+              background: '#fafcfa',
+            }}>
+              <span />
+              <span style={{ fontSize: 10.5, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.6 }}>Field</span>
+              <span style={{ fontSize: 10.5, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.6 }}>Status</span>
+              <span style={{ fontSize: 10.5, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.6, textAlign: 'right' }}>Actions</span>
+            </div>
+          )}
 
-                        {/* Badges */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                          <StageBadge stage={field.current_stage} />
-                          <StatusBadge status={field.status} />
-                        </div>
-
-                        {/* Actions */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                          <button
-                            onClick={() => { setAssigningFieldId(field.id === assigningFieldId ? null : field.id); setSelectedAgent(''); }}
-                            title="Assign agent"
-                            style={{ width: 28, height: 28, borderRadius: 6, border: '0.5px solid #e0e2dc', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                          >
-                            <UserPlus size={13} color="#1a5ac2" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(field.id)}
-                            style={{ width: 28, height: 28, borderRadius: 6, border: '0.5px solid #e0e2dc', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                          >
-                            <Trash2 size={13} color="#e85d3a" />
-                          </button>
-                          <button
-                            onClick={() => onNavigate('field-detail', String(field.id))}
-                            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, background: '#f0f7f2', color: '#1d6b35', border: 'none', fontSize: 11.5, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
-                          >
-                            View <ChevronRight size={11} />
-                          </button>
-                        </div>
+          <div style={{ overflowY: 'auto', flex: 1 }}>
+            {filtered.length === 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '48px 0', color: '#9ca3af' }}>
+                <MapPin size={32} style={{ opacity: 0.2, marginBottom: 10, display: 'block' }} />
+                <p style={{ fontSize: 13, margin: 0 }}>No fields found</p>
+                <p style={{ fontSize: 12, margin: '4px 0 0', color: '#d1d5db' }}>Try adjusting your search or filter</p>
+              </div>
+            ) : (
+              filtered.map((field, idx) => {
+                const stageStyle = STAGE_COLORS[field.current_stage] ?? { bg: '#f1f5f9', color: '#475569' };
+                const agentName  = field.assigned_agent_id
+                  ? agents.find(a => a.user_id === field.assigned_agent_id)?.full_name ?? 'Assigned'
+                  : null;
+                return (
+                  <div key={field.id}>
+                    {/* Row */}
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '40px 1fr 160px 120px',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '11px 18px',
+                        borderBottom: idx < filtered.length - 1 ? '1px solid #f9fafb' : 'none',
+                        transition: 'background 0.12s',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#fafcfa')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      {/* Icon */}
+                      <div style={{ width: 34, height: 34, borderRadius: 9, background: stageStyle.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <MapPin size={15} color={stageStyle.color} />
                       </div>
 
-                      {/* Assign inline panel */}
-                      {assigningFieldId === field.id && (
-                        <div style={{ margin: '0 16px 10px', padding: '10px 14px', background: '#f8faf8', borderRadius: 8, border: '0.5px solid #d0e8d8', display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <span style={{ fontSize: 12, color: '#555', fontWeight: 500, flexShrink: 0 }}>Assign to:</span>
-                          <select
-                            value={selectedAgent}
-                            onChange={e => setSelectedAgent(e.target.value)}
-                            style={{ flex: 1, border: '0.5px solid #ccc', borderRadius: 6, padding: '5px 8px', fontSize: 12, fontFamily: "'DM Sans', sans-serif", outline: 'none' }}
-                          >
-                            <option value="">— Unassign —</option>
-                            {agents.map(a => <option key={a.user_id} value={String(a.user_id)}>{a.full_name}</option>)}
-                          </select>
-                          <button onClick={() => handleAssign(Number(field.id))} style={{ padding: '5px 14px', borderRadius: 6, background: '#1d6b35', color: '#fff', border: 'none', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-                            Save
-                          </button>
-                          <button onClick={() => setAssigningFieldId(null)} style={{ padding: '5px 14px', borderRadius: 6, background: '#fff', color: '#555', border: '0.5px solid #ccc', fontSize: 12, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-                            Cancel
-                          </button>
-                        </div>
-                      )}
+                      {/* Name + meta */}
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ fontSize: 13.5, fontWeight: 500, color: '#111', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{field.name}</p>
+                        <p style={{ fontSize: 11.5, color: '#9ca3af', margin: 0, marginTop: 2 }}>
+                          {field.crop_type}
+                          {field.location ? ` · ${field.location}` : ''}
+                          {agentName ? ` · ${agentName}` : ' · Unassigned'}
+                        </p>
+                      </div>
+
+                      {/* Badges */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <StageBadge stage={field.current_stage} />
+                        <StatusBadge status={field.status} />
+                      </div>
+
+                      {/* Actions */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 5 }}>
+                        <button
+                          onClick={() => { setAssigningFieldId(field.id === assigningFieldId ? null : field.id); setSelectedAgent(''); }}
+                          title="Assign agent"
+                          style={{ width: 30, height: 30, borderRadius: 7, border: '1px solid #e8ede8', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.12s' }}
+                          onMouseEnter={e => (e.currentTarget.style.background = '#f0f7fb')}
+                          onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
+                        >
+                          <UserPlus size={13} color="#1a5ac2" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(field.id)}
+                          style={{ width: 30, height: 30, borderRadius: 7, border: '1px solid #e8ede8', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.12s' }}
+                          onMouseEnter={e => (e.currentTarget.style.background = '#fef2f2')}
+                          onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
+                        >
+                          <Trash2 size={13} color="#e85d3a" />
+                        </button>
+                        <button
+                          onClick={() => onNavigate('field-detail', String(field.id))}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 3,
+                            padding: '5px 11px', borderRadius: 7,
+                            background: '#eef6f0', color: '#1d6b35',
+                            border: 'none', fontSize: 12, fontWeight: 600,
+                            cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                            transition: 'background 0.12s',
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.background = '#d9eedf')}
+                          onMouseLeave={e => (e.currentTarget.style.background = '#eef6f0')}
+                        >
+                          View <ChevronRight size={11} />
+                        </button>
+                      </div>
                     </div>
-                  );
-                })
-              )}
-            </div>
+
+                    {/* Assign inline panel */}
+                    {assigningFieldId === field.id && (
+                      <div style={{
+                        margin: '0 18px 12px',
+                        padding: '12px 16px',
+                        background: '#f8fbf8',
+                        borderRadius: 9,
+                        border: '1px solid #d0e8d8',
+                        display: 'flex', alignItems: 'center', gap: 10,
+                      }}>
+                        <span style={{ fontSize: 12.5, color: '#374151', fontWeight: 500, flexShrink: 0 }}>Assign to:</span>
+                        <select
+                          value={selectedAgent}
+                          onChange={e => setSelectedAgent(e.target.value)}
+                          style={{ flex: 1, border: '1px solid #d1d5db', borderRadius: 7, padding: '6px 10px', fontSize: 12.5, fontFamily: "'DM Sans', sans-serif", outline: 'none', background: '#fff' }}
+                        >
+                          <option value="">— Unassign —</option>
+                          {agents.map(a => <option key={a.user_id} value={String(a.user_id)}>{a.full_name}</option>)}
+                        </select>
+                        <button
+                          onClick={() => handleAssign(Number(field.id))}
+                          style={{ padding: '6px 16px', borderRadius: 7, background: '#1d6b35', color: '#fff', border: 'none', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap' }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setAssigningFieldId(null)}
+                          style={{ padding: '6px 14px', borderRadius: 7, background: '#fff', color: '#6b7280', border: '1px solid #d1d5db', fontSize: 12.5, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
 
       {/* ── CREATE MODAL ── */}
       {showCreate && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 28, width: 480, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111' }}>New Field</h2>
-              <button onClick={() => setShowCreate(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa' }}><X size={18} /></button>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+          <div style={{ background: '#fff', borderRadius: 16, width: 500, boxShadow: '0 24px 64px rgba(0,0,0,0.15)', overflow: 'hidden' }}>
+            {/* Modal header */}
+            <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', margin: 0 }}>New Field</h2>
+                <p style={{ fontSize: 11.5, color: '#9ca3af', margin: 0, marginTop: 3 }}>Add a new field to your farm</p>
+              </div>
+              <button
+                onClick={() => setShowCreate(false)}
+                style={{ width: 32, height: 32, borderRadius: 8, background: '#f3f4f6', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}
+              >
+                <X size={16} />
+              </button>
             </div>
-            <form onSubmit={handleCreate}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                {[
-                  { label: 'Field Name *', key: 'name', type: 'text', placeholder: 'e.g. Field A' },
-                  { label: 'Location', key: 'location', type: 'text', placeholder: 'e.g. North Zone' },
-                  { label: 'Planting Date *', key: 'planting_date', type: 'date', placeholder: '' },
-                ].map(({ label, key, type, placeholder }) => (
-                  <div key={key} style={{ gridColumn: key === 'planting_date' ? 'span 1' : 'span 1' }}>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 500, color: '#666', marginBottom: 5 }}>{label}</label>
-                    <input
-                      required={label.includes('*')}
-                      type={type}
-                      placeholder={placeholder}
-                      value={(form as any)[key]}
-                      onChange={e => setForm({ ...form, [key]: e.target.value })}
-                      style={{ width: '100%', border: '0.5px solid #ddd', borderRadius: 8, padding: '8px 10px', fontSize: 12.5, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }}
-                    />
+
+            {/* Modal body */}
+            <div style={{ padding: '20px 24px 24px' }}>
+              <form onSubmit={handleCreate}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  {[
+                    { label: 'Field Name', key: 'name', type: 'text', placeholder: 'e.g. Field A', required: true },
+                    { label: 'Location', key: 'location', type: 'text', placeholder: 'e.g. North Zone', required: false },
+                    { label: 'Planting Date', key: 'planting_date', type: 'date', placeholder: '', required: true },
+                  ].map(({ label, key, type, placeholder, required }) => (
+                    <div key={key}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#374151', marginBottom: 6 }}>
+                        {label} {required && <span style={{ color: '#e85d3a' }}>*</span>}
+                      </label>
+                      <input
+                        required={required}
+                        type={type}
+                        placeholder={placeholder}
+                        value={(form as any)[key]}
+                        onChange={e => setForm({ ...form, [key]: e.target.value })}
+                        style={{ width: '100%', border: '1px solid #e2e8e2', borderRadius: 8, padding: '9px 12px', fontSize: 13, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box', color: '#111', transition: 'border-color 0.15s' }}
+                        onFocus={e => (e.currentTarget.style.borderColor = '#1d6b35')}
+                        onBlur={e => (e.currentTarget.style.borderColor = '#e2e8e2')}
+                      />
+                    </div>
+                  ))}
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#374151', marginBottom: 6 }}>
+                      Crop Type <span style={{ color: '#e85d3a' }}>*</span>
+                    </label>
+                    <select
+                      value={form.crop_type}
+                      onChange={e => setForm({ ...form, crop_type: e.target.value })}
+                      style={{ width: '100%', border: '1px solid #e2e8e2', borderRadius: 8, padding: '9px 12px', fontSize: 13, fontFamily: "'DM Sans', sans-serif", outline: 'none', background: '#fff', color: '#111' }}
+                    >
+                      {CROP_TYPES.map(c => <option key={c}>{c}</option>)}
+                    </select>
                   </div>
-                ))}
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 500, color: '#666', marginBottom: 5 }}>Crop Type *</label>
-                  <select
-                    value={form.crop_type}
-                    onChange={e => setForm({ ...form, crop_type: e.target.value })}
-                    style={{ width: '100%', border: '0.5px solid #ddd', borderRadius: 8, padding: '8px 10px', fontSize: 12.5, fontFamily: "'DM Sans', sans-serif", outline: 'none' }}
-                  >
-                    {CROP_TYPES.map(c => <option key={c}>{c}</option>)}
-                  </select>
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-                <button type="button" onClick={() => setShowCreate(false)} style={{ flex: 1, padding: '9px 0', borderRadius: 8, border: '0.5px solid #ddd', background: '#fff', fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", color: '#555' }}>
-                  Cancel
-                </button>
-                <button type="submit" disabled={saving} style={{ flex: 1, padding: '9px 0', borderRadius: 8, border: 'none', background: '#1d6b35', color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", opacity: saving ? 0.6 : 1 }}>
-                  {saving ? 'Creating…' : 'Create Field'}
-                </button>
-              </div>
-            </form>
+
+                {/* Modal footer */}
+                <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreate(false)}
+                    style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: '1px solid #e2e8e2', background: '#fff', fontSize: 13.5, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", color: '#6b7280', fontWeight: 500 }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: 'none', background: '#1d6b35', color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", opacity: saving ? 0.65 : 1 }}
+                  >
+                    {saving ? 'Creating…' : 'Create Field'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

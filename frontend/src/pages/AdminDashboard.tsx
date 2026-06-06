@@ -169,7 +169,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
   ];
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#f0f2ef', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f0f2ef', fontFamily: "'DM Sans', sans-serif" }}>
 
       {/* ── MOBILE OVERLAY ── */}
       {sidebarOpen && (
@@ -187,9 +187,10 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        // Mobile: slide in/out
-        position: window.innerWidth < 768 ? 'fixed' : 'relative',
-        top: 0, left: 0, bottom: 0,
+        position: window.innerWidth < 768 ? 'fixed' : 'sticky',
+        top: 0,
+        left: 0,
+        height: '100vh',
         zIndex: 50,
         transform: window.innerWidth < 768 ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'none',
         transition: 'transform 0.25s ease',
@@ -281,10 +282,10 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
       </aside>
 
       {/* ── MAIN CONTENT ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
         {/* ── TOPBAR ── */}
-        <header style={{ background: '#fff', borderBottom: '1px solid #eaeceb', padding: '0 20px', height: 58, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <header style={{ background: '#fff', borderBottom: '1px solid #eaeceb', padding: '0 20px', height: 58, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, position: 'sticky', top: 0, zIndex: 30 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {/* Hamburger on mobile */}
             <button
@@ -326,7 +327,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
         </header>
 
         {/* ── SCROLLABLE BODY ── */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* ── STAT CARDS ── */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
@@ -355,7 +356,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(200px,1fr)', gap: 12 }}>
 
             {/* Fields Table */}
-            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #eaeceb', display: 'flex', flexDirection: 'column', minHeight: 280, overflow: 'hidden' }}>
+            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #eaeceb', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid #f0f2ee' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                   <MapPin size={14} color="#1d6b35" />
@@ -366,7 +367,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
                   Manage <ChevronRight size={13} />
                 </button>
               </div>
-              <div style={{ overflowY: 'auto', flex: 1 }}>
+              <div style={{ flex: 1 }}>
                 {fields.length === 0 ? (
                   <div style={{ padding: 32, textAlign: 'center', fontSize: 12, color: '#bbb' }}>
                     <MapPin size={28} style={{ opacity: 0.2, margin: '0 auto 8px', display: 'block' }} />

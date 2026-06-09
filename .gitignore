@@ -13,3 +13,8 @@ db.sqlite3
 # Build outputs
 dist/
 build/
+
+venv/
+__pycache__/
+db.sqlite3
+*.pyc

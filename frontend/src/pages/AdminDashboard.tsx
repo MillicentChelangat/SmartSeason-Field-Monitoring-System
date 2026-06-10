@@ -165,7 +165,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
       <aside style={{
         width: 240, flexShrink: 0, height: '100vh',
         background: '#ffffff',
-        borderRight: '1px solid #e8ede8',
+        borderRight: '1px solid #e0f5e0',
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
         position: isMobile ? 'fixed' : 'relative',
         top: 0, left: 0, zIndex: isMobile ? 50 : 'auto',
@@ -287,7 +287,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
             <div style={{ position: 'absolute', right: 40, bottom: -30, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
             <div>
               <p style={{ fontSize: isMobile ? 12 : 13, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>Welcome back,</p>
-              <p style={{ fontFamily: "'Syne', sans-serif", fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>{user?.full_name?.split(' ')[0] || 'Admin'} 👋</p>
+              <p style={{ fontFamily: "'Syne', sans-serif", fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>{user?.full_name?.split(' ')[0] || 'Admin'}</p>
               <p style={{ fontSize: isMobile ? 11 : 12, color: 'rgba(255,255,255,0.5)', marginTop: 6 }}>You have {fields.length} fields and {agentCount} agents active</p>
             </div>
             <Leaf size={isMobile ? 40 : 56} color="rgba(168,230,190,0.25)" />

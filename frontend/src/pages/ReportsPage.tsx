@@ -3,7 +3,6 @@ import { FileText, Download, MapPin, Users, ChevronDown, ChevronUp } from 'lucid
 import API from '../api/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { AdminShell } from '../components/AdminShell';
-import { computeFieldStatus } from '../lib/fieldStatus';
 import { StageBadge } from '../components/StageBadge';
 import { StatusBadge } from '../components/StatusBadge';
 
@@ -80,7 +79,7 @@ export function ReportsPage({ onNavigate, onLogout, user }: Props) {
 
   const enrichedFields = fields.map(f => ({
     ...f,
-    status: computeFieldStatus(f, updates.filter(u => u.field_id === f.id)[0] ?? null),
+    status: f.status,
     updateCount: updates.filter(u => u.field_id === f.id).length,
     lastUpdate: updates.filter(u => u.field_id === f.id)[0] ?? null,
     agentName: agents.find(a => a.user_id === f.assigned_agent_id)?.full_name ?? 'Unassigned',

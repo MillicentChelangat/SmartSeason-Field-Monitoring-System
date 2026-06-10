@@ -2,18 +2,17 @@ import { useEffect, useState } from 'react';
 import {
   Leaf, LayoutDashboard, MapPin, Users, AlertTriangle,
   CheckCircle2, Activity, TrendingUp, BarChart2,
-  FileText, Settings, HelpCircle, LogOut, Download,
+  FileText, Settings, HelpCircle,  Download,
   Plus, Menu, X, Bell, ChevronRight,
 } from 'lucide-react';
 import API from '../api/api.ts';
 import type { Field, FieldUpdate, Profile } from '../types/database';
-import { computeFieldStatus } from '../lib/fieldStatus';
 import { StatusBadge } from '../components/StatusBadge';
 import { StageBadge } from '../components/StageBadge';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { AdminSidebar } from '../components/AdminSidebar.tsx';
 
 interface FieldWithStatus extends Field {
-  status: ReturnType<typeof computeFieldStatus>;
   lastUpdate?: FieldUpdate | null;
   assignedAgents: Profile[];
 }
@@ -26,16 +25,6 @@ interface Props {
   onLogout: () => void;
   user: any;
 }
-
-const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, section: 'menu' },
-  { id: 'fields',    label: 'Fields',    icon: MapPin,          section: 'menu' },
-  { id: 'agents',    label: 'Agents',    icon: Users,           section: 'menu' },
-  { id: 'analytics', label: 'Analytics', icon: BarChart2,       section: 'reports' },
-  { id: 'reports',   label: 'Reports',   icon: FileText,        section: 'reports' },
-  { id: 'settings',  label: 'Settings',  icon: Settings,        section: 'system' },
-  { id: 'help',      label: 'Help',      icon: HelpCircle,      section: 'system' },
-];
 
 const STAGE_COLORS: Record<string, string> = {
   planted:   '#e8a020',
@@ -102,8 +91,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
         const enriched: FieldWithStatus[] = rawFields.map(field => {
           const fieldUpdates = allUpdates.filter(u => u.field_id === field.id);
           const lastUpdate   = fieldUpdates[0] ?? null;
-          return { ...field, status: computeFieldStatus(field, lastUpdate), lastUpdate, assignedAgents: [] };
-        });
+return { ...field, lastUpdate, assignedAgents: [] };        });
         const enrichedUpdates: EnrichedUpdate[] = allUpdates.map(update => {
           const field = rawFields.find(f => f.id === update.field_id);
           const agent = agents.find(a => a.user_id === update.agent_id);
@@ -130,8 +118,9 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
     );
   }
 
+  
   const atRisk    = fields.filter(f => f.status === 'at_risk').length;
-  const completed = fields.filter(f => f.status === 'completed').length;
+  const completed = fields.filter(f => f.current_stage === 'harvested').length;
   const stageBreakdown = {
     planted:   fields.filter(f => f.current_stage === 'planted').length,
     growing:   fields.filter(f => f.current_stage === 'growing').length,
@@ -162,87 +151,25 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
       )}
 
       {/* ══ SIDEBAR — now white ══ */}
-      <aside style={{
+    <aside style={{
         width: 240, flexShrink: 0, height: '100vh',
-        background: '#ffffff',
         borderRight: '1px solid #e0f5e0',
-        display: 'flex', flexDirection: 'column', overflow: 'hidden',
         position: isMobile ? 'fixed' : 'relative',
         top: 0, left: 0, zIndex: isMobile ? 50 : 'auto',
         transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
         transition: 'transform 0.25s ease',
         boxShadow: isMobile && sidebarOpen ? '6px 0 30px rgba(0,0,0,0.12)' : 'none',
-      }}>
-        {/* Logo */}
-        <div style={{ padding: '22px 20px 18px', borderBottom: '1px solid #f0f4f0', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 34, height: 34, background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(45,122,69,0.3)', flexShrink: 0 }}>
-              <Leaf size={17} color="#a8e6be" />
-            </div>
-            <div>
-              {/* "Smart" black, "Season" green */}
-              <p style={{ fontFamily: "'Syne', sans-serif", fontSize: 14, fontWeight: 700, letterSpacing: -0.4, lineHeight: 1, margin: 0 }}>
-                <span style={{ color: '#111' }}>Smart</span><span style={{ color: '#1d6b35' }}>Season</span>
-              </p>
-              <p style={{ fontSize: 10, color: '#9ca3af', marginTop: 2, margin: 0 }}>Field Management</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Nav */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-          {(['menu', 'reports', 'system'] as const).map(section => (
-            <div key={section} style={{ marginBottom: 8 }}>
-              <p style={{ fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 1.3, padding: '10px 8px 4px', fontWeight: 600, margin: 0 }}>{section}</p>
-              {NAV_ITEMS.filter(i => i.section === section).map(({ id, label, icon: Icon }) => {
-                const isActive = activePage === id;
-                const badge = id === 'fields' ? fields.length : id === 'agents' ? agentCount : undefined;
-                return (
-                  <button key={id} onClick={() => handleNav(id)}
-                    style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '9px 10px', borderRadius: 8, marginBottom: 2,
-                      background: isActive ? '#eef6f0' : 'transparent',
-                      color: isActive ? '#1d6b35' : '#6b7280',
-                      fontSize: 13, fontWeight: isActive ? 600 : 400,
-                      border: 'none', cursor: 'pointer', textAlign: 'left',
-                      fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s',
-                    }}
-                    onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = '#f9fafb'; e.currentTarget.style.color = '#374151'; }}}
-                    onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#6b7280'; }}}
-                  >
-                    <Icon size={16} />
-                    <span style={{ flex: 1 }}>{label}</span>
-                    {badge !== undefined && (
-                      <span style={{ background: isActive ? '#1d6b35' : '#e85d3a', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 7px', borderRadius: 20 }}>{badge}</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
-
-        {/* User + Logout */}
-        <div style={{ padding: '12px 12px 16px', borderTop: '1px solid #f0f4f0', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px', borderRadius: 9, background: '#f9fafb', marginBottom: 6 }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#a8e6be', fontWeight: 700, flexShrink: 0 }}>
-              {user?.full_name ? initials(user.full_name) : 'A'}
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <p style={{ fontSize: 12.5, color: '#111', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>{user?.full_name || 'Admin'}</p>
-              <p style={{ fontSize: 10.5, color: '#9ca3af', margin: 0 }}>Administrator</p>
-            </div>
-          </div>
-          <button onClick={onLogout}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderRadius: 8, color: '#ef4444', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s', fontWeight: 500 }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-          >
-            <LogOut size={15} /> Sign out
-          </button>
-        </div>
-      </aside>
+     }}>
+       <AdminSidebar
+        activePage={activePage}
+        onNavigate={handleNav}
+        onLogout={onLogout}
+        user={user}
+        fieldCount={fields.length}
+        agentCount={agentCount}
+        onClose={() => setSidebarOpen(false)}
+       />
+    </aside>
 
       {/* ══ MAIN — only this scrolls ══ */}
       <div style={{ flex: 1, minWidth: 0, height: '100vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
@@ -427,7 +354,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))' }}>
                 {recentUpdates.slice(0, 6).map((update, idx) => (
                   <div key={update.id} style={{ display: 'flex', gap: 12, padding: '14px 18px', borderBottom: '1px solid #f9fafb', borderRight: '1px solid #f9fafb' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: update.status === 'at_risk' ? '#ef4444' : '#22c55e', flexShrink: 0, marginTop: 6 }} />
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0, marginTop: 6 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: 13, color: '#374151', lineHeight: 1.5, margin: 0 }}>
                         <strong style={{ color: '#1d6b35' }}>{update.agent_name}</strong>{' updated '}

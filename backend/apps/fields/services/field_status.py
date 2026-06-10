@@ -1,4 +1,5 @@
 from django.utils import timezone
+from apps.fields.services.field_status import compute_field_status
 
 def compute_field_status(field):
 

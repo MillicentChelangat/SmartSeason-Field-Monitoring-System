@@ -3,8 +3,6 @@ import { BarChart2, TrendingUp, AlertTriangle, Users, MapPin, Activity } from 'l
 import API from '../api/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { AdminShell} from '../components/AdminShell';
-import { computeFieldStatus } from '../lib/fieldStatus';
-
 interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
@@ -82,8 +80,7 @@ export function AnalyticsPage({ onNavigate, onLogout, user }: Props) {
 
   const enriched = fields.map(f => ({
     ...f,
-    status: computeFieldStatus(f, updates.filter(u => u.field_id === f.id)[0] ?? null),
-  }));
+status: f.status,  }));
 
   const stageBreakdown = {
     planted:   enriched.filter(f => f.current_stage === 'planted').length,

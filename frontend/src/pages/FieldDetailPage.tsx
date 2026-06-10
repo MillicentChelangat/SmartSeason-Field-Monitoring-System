@@ -4,7 +4,6 @@ import API from '../api/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { StatusBadge } from '../components/StatusBadge';
 import { StageBadge } from '../components/StageBadge';
-import { computeFieldStatus } from '../lib/fieldStatus';
 import { AdminShell } from '../components/AdminShell';
 import { AgentShell } from '../components/AgentShell';
 
@@ -12,7 +11,7 @@ const STAGES = ['planted', 'growing', 'ready', 'harvested'] as const;
 type FieldStage = typeof STAGES[number];
 
 interface Props {
-  fieldId: string;
+  fieldId: string;  
   onBack: () => void;
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
@@ -109,7 +108,7 @@ export function FieldDetailPage({ fieldId, onBack, onNavigate, onLogout, user }:
   );
 
   const daysSincePlanting = Math.floor((Date.now() - new Date(field.planting_date).getTime()) / (1000 * 60 * 60 * 24));
-  const status            = computeFieldStatus(field, updates[0] ?? null);
+  const status = field.status;
   const currentStepIdx    = STAGE_STEPS.indexOf(field.current_stage);
 
   return (

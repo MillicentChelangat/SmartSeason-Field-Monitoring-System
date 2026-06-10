@@ -5,14 +5,12 @@ import {
 } from 'lucide-react';
 import API from '../api/api';
 import type { Field, FieldUpdate } from '../types/database';
-import { computeFieldStatus } from '../lib/fieldStatus';
 import { StatusBadge } from '../components/StatusBadge';
 import { StageBadge } from '../components/StageBadge';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { AgentShell } from '../components/AgentShell';
 
 interface FieldWithStatus extends Field {
-  status: ReturnType<typeof computeFieldStatus>;
   lastUpdate?: FieldUpdate | null;
 }
 
@@ -61,8 +59,7 @@ export function AgentDashboard({ onNavigate, onLogout, user }: Props) {
         const enriched: FieldWithStatus[] = rawFields.map(field => {
           const fieldUpdates = updates.filter(u => u.field_id === field.id);
           const lastUpdate   = fieldUpdates[0] ?? null;
-          return { ...field, status: computeFieldStatus(field, lastUpdate), lastUpdate };
-        });
+        return { ...field, lastUpdate, assignedAgents: [] };        });
         setFields(enriched);
         setRecentUpdates(updates.slice(0, 8));
       } catch (error) {

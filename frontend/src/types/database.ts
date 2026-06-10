@@ -1,5 +1,5 @@
 export type FieldStage = 'planted' | 'growing' | 'ready' | 'harvested';
-export type FieldStatus = 'active' | 'at_risk' | 'completed';
+export type FieldStatus = 'healthy' | 'monitor' |'at_risk' | 'critical' ;
 export type UserRole = 'admin' | 'field_agent';
 
 export interface Profile {
@@ -20,6 +20,7 @@ export interface Field {
   assigned_agent_id: number | null; 
   created_at: string;
   updated_at?: string;
+  status: FieldStatus;
 }
 
 export interface FieldUpdate {

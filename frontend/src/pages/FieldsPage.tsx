@@ -2,14 +2,12 @@ import { useEffect, useState } from 'react';
 import { Plus, Search, MapPin, Trash2, UserPlus, X, ChevronRight } from 'lucide-react';
 import API from '../api/api';
 import type { Field, FieldUpdate, Profile } from '../types/database';
-import { computeFieldStatus } from '../lib/fieldStatus';
 import { StatusBadge } from '../components/StatusBadge';
 import { StageBadge } from '../components/StageBadge';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { AdminShell } from '../components/AdminShell';
 
 interface FieldWithExtras extends Field {
-  status: ReturnType<typeof computeFieldStatus>;
 }
 
 interface Props {
@@ -52,8 +50,7 @@ export function FieldsPage({ onNavigate, onLogout, user }: Props) {
       const agentsData: Profile[]   = agentsRes.data;
       const enriched: FieldWithExtras[] = rawFields.map(f => ({
         ...f,
-        status: computeFieldStatus(f, updates.filter(u => u.field_id === f.id)[0] ?? null),
-      }));
+status: f.status,      }));
       setFields(enriched);
       setAgents(agentsData);
     } catch (err) {

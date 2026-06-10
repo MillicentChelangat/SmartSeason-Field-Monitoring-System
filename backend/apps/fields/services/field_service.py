@@ -1,12 +1,22 @@
 from apps.fields.models import Field, FieldUpdate, Profile
-
+from apps.fields.services.field_status import compute_field_status
 
 def get_all_fields():
-    return Field.objects.all().values(
-        'id', 'name', 'crop_type', 'planting_date',
-        'current_stage', 'location', 'assigned_agent_id', 'created_at'
-    )
-
+    fields = Field.objects.prefetch_related('updates').all()
+    result = []
+    for field in fields:
+        result.append({
+            'id': field.id,
+            'name': field.name,
+            'crop_type': field.crop_type,
+            'planting_date': str(field.planting_date),
+            'current_stage': field.current_stage,
+            'location': field.location,
+            'assigned_agent_id': field.assigned_agent_id,
+            'created_at': str(field.created_at),
+            'status': compute_field_status(field),
+        })
+    return result
 
 def get_field_by_id(field_id):
     return Field.objects.filter(id=field_id).values(

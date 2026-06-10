@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
-  Leaf, LayoutDashboard, MapPin, Users,
-  BarChart2, FileText, LogOut, Menu, X,
+  Leaf, LayoutDashboard, MapPin, Users, Settings,
+  BarChart2, FileText, LogOut, Menu, X, HelpCircle
 } from 'lucide-react';
 
 interface Props {
@@ -18,6 +18,8 @@ const NAV_ITEMS = [
   { id: 'agents',    label: 'Agents',    icon: Users,            section: 'menu' },
   { id: 'analytics', label: 'Analytics', icon: BarChart2,        section: 'reports' },
   { id: 'reports',   label: 'Reports',   icon: FileText,         section: 'reports' },
+  { id: 'settings',  label: 'Settings',  icon: Settings,        section: 'system' },
+  { id: 'help',      label: 'Help',      icon: HelpCircle,      section: 'system' },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
@@ -26,6 +28,8 @@ const PAGE_TITLES: Record<string, string> = {
   agents:    'Agents',
   analytics: 'Analytics',
   reports:   'Reports',
+  settings:  'Settings',
+  help:      'Help & Support',
 };
 
 function initials(name: string) {
@@ -83,7 +87,7 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user }:
 
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 12px' }}>
-        {(['menu', 'reports'] as const).map(section => (
+        {(['menu', 'reports', 'system'] as const).map(section => (
           <div key={section} style={{ marginBottom: 4 }}>
             <p style={{ fontSize: 10, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 1.3, padding: '14px 8px 6px', margin: 0 }}>
               {section}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Leaf, Eye, EyeOff, TrendingUp, Users, MapPin } from 'lucide-react';
+import { Leaf, Eye, EyeOff } from 'lucide-react';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import API from '../api/api';
 
@@ -27,6 +27,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -67,6 +68,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     setError('');
     setSuccess('');
   }
+
 
   return (
     <div className="min-h-screen flex">
@@ -126,34 +128,8 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
               all from one intelligent dashboard.
             </p>
 
-            {/* Stats row */}
-            <div className="flex gap-8 mt-8">
-              <div>
-                <div className="flex items-center gap-2 text-white">
-                  <MapPin className="h-4 w-4 text-green-300" />
-                  <span className="text-2xl font-bold">6</span>
-                </div>
-                <p className="text-white/50 text-xs mt-0.5">Active Fields</p>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 text-white">
-                  <Users className="h-4 w-4 text-green-300" />
-                  <span className="text-2xl font-bold">5</span>
-                </div>
-                <p className="text-white/50 text-xs mt-0.5">Field Agents</p>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 text-white">
-                  <TrendingUp className="h-4 w-4 text-green-300" />
-                  <span className="text-2xl font-bold">98%</span>
-                </div>
-                <p className="text-white/50 text-xs mt-0.5">Uptime</p>
-              </div>
-            </div>
-          </div>
-
           {/* Bottom: footer note */}
-          <p className="text-white/30 text-xs">
+          <p className="text-white/30 text-xs mt-10">
             © {new Date().getFullYear()} SmartSeason. All rights reserved.
           </p>
         </div>
@@ -344,11 +320,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         {/* Footer */}
         <p className="text-center text-xs text-slate-400 mt-6">
           By continuing, you agree to our{' '}
-          <a href="#" className="text-green-700 font-medium hover:underline">Terms</a>
+          <a href="terms" className="text-green-700 font-medium hover:underline">Terms</a>
           {' '}and{' '}
-          <a href="#" className="text-green-700 font-medium hover:underline">Privacy Policy</a>.
+          <a href="privacy" className="text-green-700 font-medium hover:underline">Privacy Policy</a>.
         </p>
       </div>
+    </div>
     </div>
   );
 }

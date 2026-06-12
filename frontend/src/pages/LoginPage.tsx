@@ -23,6 +23,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [role, setRole] = useState<'admin' | 'field_agent'>('field_agent');
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -286,31 +287,33 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             </div>
           </div>
 
-         {/* Confirm Password */}
+         {/* Confirm Password – register only */}
+         {mode === 'register' && (
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               Confirm Password
             </label>
             <div className="relative">
               <input
-                type={showPassword ? 'text' : 'confirm password'}
+                type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="••••••••"
-                value={password}
+                value={ConfirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 required
                 className="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent focus:bg-white transition"
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(v => !v)}
+                onClick={() => setShowConfirmPassword(v => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
-                {showPassword
+                {showConfirmPassword
                   ? <EyeOff className="h-4 w-4" />
                   : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
+         )}
 
           {/* Error */}
           {error && (

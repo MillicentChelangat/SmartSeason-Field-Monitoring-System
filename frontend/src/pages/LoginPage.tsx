@@ -9,7 +9,6 @@ type LoginPageProps = {
   onLoginSuccess: (user: any) => void;
 };
 
-// ── Background image (free, no watermark – swap the URL for your own image) ──
 const BG_IMAGE =
   'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200&q=85&fit=crop';
 
@@ -20,14 +19,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState<'admin' | 'field_agent'>('field_agent');
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,12 +46,20 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
           setLoading(false);
           return;
         }
-        await API.post('register/', { email, password, confirmPassword, full_name: fullName,  role:'field_agent' });
+        await API.post('register/', {
+          email,
+          password,
+          confirmPassword,
+          full_name: fullName,
+          role: 'field_agent',
+        });
         setSuccess('Account created successfully.');
-        setTimeout(() => { setSuccess(''); }, 2000);
+        setTimeout(() => setSuccess(''), 3000);
         setMode('login');
         setFullName('');
-        setRole('field_agent');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
@@ -69,11 +74,10 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     setSuccess('');
   }
 
-
   return (
     <div className="min-h-screen flex">
 
-      {/* ── LEFT PANEL: background image + branding ── */}
+      {/* ── LEFT PANEL ── */}
       <div
         className="hidden lg:flex flex-1 relative overflow-hidden"
         aria-hidden="true"
@@ -94,7 +98,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
           }}
         />
 
-        {/* Content on top of overlay */}
+        {/* Content */}
         <div className="relative z-10 flex flex-col justify-between h-full p-10">
 
           {/* Top: logo */}
@@ -127,18 +131,21 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
               Monitor your fields, track crop stages, and coordinate agents —
               all from one intelligent dashboard.
             </p>
+          </div>
 
           {/* Bottom: footer note */}
-          <p className="text-white/30 text-xs mt-10">
+          <p className="text-white/30 text-xs text-center">
             © {new Date().getFullYear()} SmartSeason. All rights reserved.
           </p>
+
         </div>
       </div>
+      {/* ── END LEFT PANEL ── */}
 
-      {/* ── RIGHT PANEL: form ── */}
+      {/* ── RIGHT PANEL ── */}
       <div className="w-full lg:w-[420px] bg-white flex flex-col justify-center px-8 py-10 overflow-y-auto">
 
-        {/* Mobile logo (shown only when left panel is hidden) */}
+        {/* Mobile logo */}
         <div className="flex lg:hidden items-center gap-2 mb-8">
           <div className="bg-green-700 rounded-xl p-2">
             <Leaf className="h-5 w-5 text-white" />
@@ -206,22 +213,6 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             </div>
           )}
 
-          {/* Role – register only */}
-          {mode === 'register' && (
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                Role
-              </label>
-              <select
-                value={role}
-                onChange={e => setRole(e.target.value as 'admin' | 'field_agent')}
-                className="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition appearance-none"
-              >
-                <option value="field_agent">Field Agent</option>
-              </select>
-            </div>
-          )}
-
           {/* Email */}
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">
@@ -256,40 +247,36 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 onClick={() => setShowPassword(v => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
-                {showPassword
-                  ? <EyeOff className="h-4 w-4" />
-                  : <Eye className="h-4 w-4" />}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
-         {/* Confirm Password – register only */}
-         {mode === 'register' && (
-          <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-                required
-                className="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent focus:bg-white transition"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-              >
-                {showConfirmPassword
-                  ? <EyeOff className="h-4 w-4" />
-                  : <Eye className="h-4 w-4" />}
-              </button>
+          {/* Confirm Password – register only */}
+          {mode === 'register' && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent focus:bg-white transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
-          </div>
-         )}
+          )}
 
           {/* Error */}
           {error && (
@@ -320,12 +307,14 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         {/* Footer */}
         <p className="text-center text-xs text-slate-400 mt-6">
           By continuing, you agree to our{' '}
-          <a href="terms" className="text-green-700 font-medium hover:underline">Terms</a>
+          <a href="/terms" className="text-green-700 font-medium hover:underline">Terms</a>
           {' '}and{' '}
-          <a href="privacy" className="text-green-700 font-medium hover:underline">Privacy Policy</a>.
+          <a href="/privacy" className="text-green-700 font-medium hover:underline">Privacy Policy</a>.
         </p>
+
       </div>
-    </div>
+      {/* ── END RIGHT PANEL ── */}
+
     </div>
   );
 }

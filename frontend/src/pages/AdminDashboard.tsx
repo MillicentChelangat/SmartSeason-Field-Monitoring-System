@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
-  Leaf, LayoutDashboard, MapPin, Users, AlertTriangle,
-  CheckCircle2, Activity, TrendingUp, BarChart2,
-  FileText, Settings, HelpCircle,  Download,
+  Leaf, MapPin, Users, AlertTriangle,
+  CheckCircle2, Activity, TrendingUp,  Download,
   Plus, Menu, X, Bell, ChevronRight,
 } from 'lucide-react';
 import API from '../api/api.ts';

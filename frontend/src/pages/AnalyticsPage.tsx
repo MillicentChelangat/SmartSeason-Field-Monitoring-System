@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { BarChart2, TrendingUp, AlertTriangle, Users, MapPin, Activity } from 'lucide-react';
 import API from '../api/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { AdminShell} from '../components/AdminShell';
+import { AdminSidebar } from '../components/AdminSidebar';   
+
 interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
@@ -168,8 +169,6 @@ status: f.status,  }));
         }
       `}</style>
 
-      <AdminShell activePage="analytics" onNavigate={onNavigate} onLogout={onLogout} user={user}>
-
         {/* Topbar */}
         <div style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', marginBottom: 14, border: '1px solid #e8ede8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
@@ -247,8 +246,6 @@ status: f.status,  }));
           <p className="analytics-card-sub">At-risk flags logged per month</p>
           <MiniBarChart data={atRiskByMonth} color="#e85d3a" />
         </div>
-
-      </AdminShell>
     </>
   );
 }

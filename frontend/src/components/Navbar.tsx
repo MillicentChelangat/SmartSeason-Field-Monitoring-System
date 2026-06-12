@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Leaf, LayoutDashboard, MapPin, Users, LogOut, Menu, X, ChevronDown } from 'lucide-react';
+import { Leaf, LayoutDashboard, MapPin, Users, LogOut, Menu, X, ChevronDown, BarChart2, FileText, Settings, HelpCircle, } from 'lucide-react';
 
 interface NavbarProps {
   user: any;
@@ -15,14 +15,22 @@ export function Navbar({ user, currentPage, onNavigate, onLogout }: NavbarProps)
   const isAdmin = user?.role === 'admin';
 
   const adminLinks = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'fields', label: 'Fields', icon: MapPin },
-    { id: 'agents', label: 'Agents', icon: Users },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, section: 'menu' },
+  { id: 'fields',    label: 'Fields',    icon: MapPin,           section: 'menu' },
+  { id: 'agents',    label: 'Agents',    icon: Users,            section: 'menu' },
+  { id: 'analytics', label: 'Analytics', icon: BarChart2,        section: 'reports' },
+  { id: 'reports',   label: 'Reports',   icon: FileText,         section: 'reports' },
+  { id: 'settings',  label: 'Settings',  icon: Settings,         section: 'system' },
+  { id: 'help',      label: 'Help',      icon: HelpCircle,       section: 'system' },
   ];
 
   const agentLinks = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'my-fields', label: 'My Fields', icon: MapPin },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, section: 'menu' },
+  { id: 'my fields', label: 'My Fields', icon: MapPin,          section: 'menu' },
+  { id: 'analytics', label: 'Analytics', icon: BarChart2,        section: 'reports' },
+  { id: 'reports',   label: 'Reports',   icon: FileText,         section: 'reports' },
+  { id: 'settings',  label: 'Settings',  icon: Settings,         section: 'system' },
+  { id: 'help',      label: 'Help',      icon: HelpCircle,       section: 'system' },
   ];
 
   const links = isAdmin ? adminLinks : agentLinks;

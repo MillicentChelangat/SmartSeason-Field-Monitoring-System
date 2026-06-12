@@ -18,7 +18,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [ConfirmPassword, setConfirmPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState<'admin' | 'field_agent'>('field_agent');
 
@@ -48,8 +48,9 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
           setLoading(false);
           return;
         }
-        await API.post('register/', { email, password, ConfirmPassword, full_name: fullName, role });
+        await API.post('register/', { email, password, confirmPassword, full_name: fullName,  role:'field_agent' });
         setSuccess('Account created successfully.');
+        setTimeout(() => { setSuccess(''); }, 2000);
         setMode('login');
         setFullName('');
         setRole('field_agent');
@@ -241,7 +242,6 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 className="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition appearance-none"
               >
                 <option value="field_agent">Field Agent</option>
-                <option value="admin">Admin</option>
               </select>
             </div>
           )}
@@ -297,7 +297,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="••••••••"
-                value={ConfirmPassword}
+                value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 required
                 className="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent focus:bg-white transition"

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Leaf, LayoutDashboard, MapPin, LogOut, Menu, X,
+  Leaf, LayoutDashboard, MapPin, LogOut, Menu, X, BarChart2, Settings, HelpCircle,
 } from 'lucide-react';
 
 interface Props {
@@ -14,6 +14,9 @@ interface Props {
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, section: 'menu' },
   { id: 'my-fields', label: 'My Fields', icon: MapPin, section: 'menu' },
+  { id: 'analytics', label: 'Analytics', icon: BarChart2, section: 'reports' },
+  { id: 'settings', label: 'Settings', icon: Settings, section: 'system' },
+  { id: 'help', label: 'Help', icon: HelpCircle, section: 'system' },
 ];
 
 function initials(name: string) {
@@ -25,21 +28,22 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
 
   const handleNavigate = (page: string) => {
     onNavigate(page);
-    setSidebarOpen(false); // close sidebar on mobile after nav
+    setSidebarOpen(false);
   };
 
   const SidebarContent = () => (
     <>
       {/* Logo */}
-      <div style={{ padding: '18px 16px 16px', borderBottom: '0.5px solid 0.5px solid #f0f2ee' }}>
+      <div style={{ padding: '18px 16px 16px', borderBottom: '0.5px solid #f0f2ee' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 28, height: 28, background: '#2d7a45', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Leaf size={15} color="#a8e6be" />
             </div>
-            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: -0.3 }}>
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 500, color: '#111', letterSpacing: -0.3 }}>
               SmartSeason
             </span>
+            <span style={{ fontSize: 11, color: '#888', display: 'block' }}>Field Management</span>
           </div>
           {/* Close button — mobile only */}
           <button
@@ -54,56 +58,61 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
 
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
-        <div>
-          <p style={{ fontSize: 11, color: '#aaa', textTransform: 'uppercase', letterSpacing: 1, padding: '12px 8px 6px', fontWeight: 500 }}>
-            Menu
-          </p>
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-            const isActive = activePage === id;
-            return (
-              <button
-                key={id}
-                onClick={() => handleNavigate(id)}
-                style={{
-                  width: '100%', display: 'flex', alignItems: 'center', gap: 9,
-                  padding: '8px 10px', borderRadius: 8, marginBottom: 1,
-                  background: isActive ? '#2d7a45' : 'transparent',
-                  color: isActive ? '#fff' : '#555',
-                  fontSize: 14.5, fontWeight: isActive ? 500 : 400,
-                  border: 'none', cursor: 'pointer', textAlign: 'left',
-                  fontFamily: "'DM Sans', sans-serif", transition: 'background 0.15s',
-                }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-                onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
-              >
-                <Icon size={15} />
-                <span style={{ flex: 1 }}>{label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+       {['menu', 'reports', 'system'].map(section => {
+       const sectionItems = NAV_ITEMS.filter(item => item.section === section);
+       return (
+      <div key={section}>
+        <p style={{ fontSize: 11, color: '#aaa', textTransform: 'uppercase', letterSpacing: 1, padding: '12px 8px 6px', fontWeight: 500 }}>
+          {section}
+        </p>
+        {sectionItems.map(({ id, label, icon: Icon }) => {
+          const isActive = activePage === id;
+          return (
+            <button
+              key={id}
+              onClick={() => handleNavigate(id)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 9,
+                padding: '8px 10px', borderRadius: 8, marginBottom: 1,
+                background: isActive ? '#e8f5ee' : 'transparent',
+                color: isActive ? '#1d6b35' : '#555',
+                fontSize: 14.5, fontWeight: isActive ? 600 : 400,
+                border: 'none', cursor: 'pointer', textAlign: 'left',
+                fontFamily: "'DM Sans', sans-serif", transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#f5f6f4'; }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+            >
+              <Icon size={15} />
+              <span style={{ flex: 1 }}>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  })}
+</nav>
 
       {/* User + Logout */}
-      <div style={{ padding: '10px 8px', borderTop: '0.5px solid 0.5px solid #f0f2ee' }}>
+      <div style={{ padding: '10px 8px', borderTop: '0.5px solid #f0f2ee' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', marginBottom: 3 }}>
-          <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#2d7a45', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, color: '#fff', fontWeight: 600, flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#2d7a45', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#fff', fontWeight: 600, flexShrink: 0 }}>
             {user?.full_name ? initials(user.full_name) : 'A'}
           </div>
           <div style={{ minWidth: 0 }}>
-            <p style={{ fontSize: 14, color: '#fff', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <p style={{ fontSize: 13, color: '#111', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
               {user?.full_name || 'Agent'}
             </p>
-            <p style={{ fontSize: 11, color: '#888' }}>Field Agent</p>
+            <p style={{ fontSize: 11, color: '#888', margin: 0 }}>Field Agent</p>
           </div>
         </div>
         <button
           onClick={onLogout}
-          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, color: 'rgba(255,100,80,0.75)', fontSize: 14.5, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,80,60,0.1)'; e.currentTarget.style.color = '#ff6e5a'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,100,80,0.75)'; }}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, color: '#e85d3a', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#fde8e4'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
         >
-          <LogOut size={15} /> Logout
+          <LogOut size={15} /> Sign out
         </button>
       </div>
     </>
@@ -112,7 +121,7 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#eef0eb', fontFamily: "'DM Sans', sans-serif" }}>
 
-      {/* ── DESKTOP SIDEBAR (hidden on mobile) ── */}
+      {/* ── DESKTOP SIDEBAR ── */}
       <aside
         className="hidden lg:flex"
         style={{ width: 200, flexShrink: 0, margin: 12, background: '#fff', borderRadius: 14, flexDirection: 'column', overflow: 'hidden' }}
@@ -147,7 +156,7 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
       {/* ── MAIN CONTENT ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-        {/* Mobile top bar */}
+        {/* Mobile hamburger only — no SmartSeason title */}
         <div
           className="lg:hidden"
           style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: '#eef0eb' }}
@@ -156,16 +165,8 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
             onClick={() => setSidebarOpen(true)}
             style={{ background: '#fff', border: 'none', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <Menu size={18} color="#fff" />
+            <Menu size={18} color="#555" />
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-            <div style={{ width: 24, height: 24, background: '#2d7a45', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Leaf size={13} color="#a8e6be" />
-            </div>
-            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: -0.3 }}>
-              SmartSeason
-            </span>
-          </div>
         </div>
 
         {/* Page content */}

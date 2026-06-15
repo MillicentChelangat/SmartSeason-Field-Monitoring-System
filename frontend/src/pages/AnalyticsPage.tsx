@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BarChart2, TrendingUp, AlertTriangle, Users, MapPin, Activity } from 'lucide-react';
+import { BarChart2, TrendingUp, AlertTriangle, Users, MapPin, Activity, Menu } from 'lucide-react';
 import API from '../api/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { AdminSidebar } from '../components/AdminSidebar';   
@@ -171,11 +171,19 @@ status: f.status,  }));
 
         {/* Topbar */}
         <div style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', marginBottom: 14, border: '1px solid #e8ede8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', margin: 0 }}>Analytics</h1>
-            <p style={{ fontSize: 11.5, color: '#9ca3af', margin: 0, marginTop: 2 }}>Farm performance overview</p>
-          </div>
-        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+         <button
+        onClick={() => onNavigate('toggle-sidebar')}
+         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+        >
+        <Menu size={20} color="#555" />
+       </button>
+        <div>
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', margin: 0 }}>Analytics</h1>
+          <p style={{ fontSize: 11.5, color: '#9ca3af', margin: 0, marginTop: 2 }}>Farm performance overview</p>
+       </div>
+       </div>
+       </div>
 
         {/* Stat cards — 2 cols on mobile, 4 on desktop */}
         <div className="analytics-stat-grid" style={{ marginBottom: 14 }}>

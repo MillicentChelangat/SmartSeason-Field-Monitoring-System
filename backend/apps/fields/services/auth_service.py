@@ -1,3 +1,10 @@
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
+from apps.fields.models import Profile
+
+
+
 def register_user(email, password, full_name, role='field_agent'):
     if not email or not password:
         raise ValueError("Email and password required")

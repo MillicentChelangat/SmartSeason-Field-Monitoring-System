@@ -2,7 +2,8 @@ from .base import *
 import os
 import dj_database_url
 
-DEBUG = False
+#DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'smartseason-field-monitoring-system-1-bm87.onrender.com',

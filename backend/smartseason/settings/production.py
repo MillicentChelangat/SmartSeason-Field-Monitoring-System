@@ -16,7 +16,7 @@ DATABASES = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    # add your frontend URL here
+    'https://smart-season-field-monitoring-syste-liard.vercel.app',
 ]
 
 SECRET_KEY = os.environ.get('SECRET_KEY', '')

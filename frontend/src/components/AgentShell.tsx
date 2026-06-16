@@ -105,9 +105,7 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
 
       {/* User + Logout */}
       <div style={{ padding: '12px 12px 16px', borderTop: '1px solid #f0f4f0', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px', borderRadius: 9, background: '#f9fafb', marginBottom: 6 }}>
-          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#fff', fontWeight: 700, flexShrink: 0 }}>
-            {user?.full_name ? initials(user.full_name) : 'A'}
+      <div style={{ display: 'flex', alignItems: 'center', gap: isCollapsed ? 0 : 10, padding: '10px', borderRadius: 9, background: '#f9fafb', marginBottom: 6, justifyContent: isCollapsed ? 'center' : 'flex-start' }}>            {user?.full_name ? initials(user.full_name) : 'A'}
           </div>
           {!isCollapsed && (
             <div style={{ minWidth: 0, flex: 1 }}>

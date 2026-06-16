@@ -11,6 +11,8 @@ import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import { AdminShell } from './components/AdminShell';
+
 
 type Page =
   | 'dashboard' | 'fields' | 'my-fields' | 'agents'
@@ -73,25 +75,38 @@ export default function App() {
     }
 
     if (isAdmin) {
-      switch (page) {
-        case 'fields':    return <FieldsPage    key={refreshKey} {...sharedProps} />;
-        case 'agents':    return <AgentsPage    key={refreshKey} {...sharedProps} />;
-        case 'analytics': return <AnalyticsPage key={refreshKey} {...sharedProps} />;
-        case 'reports':   return <ReportsPage   key={refreshKey} {...sharedProps} />;
-        case 'settings':  return <SettingsPage  key={refreshKey} {...sharedProps} />;
-        case 'help':      return <HelpPage      key={refreshKey} {...sharedProps} />;
-        default:          return <AdminDashboard key={refreshKey} {...sharedProps} />;
-      }
-    } else {
-      switch (page) {
-        case 'my-fields': return <MyFieldsPage key={refreshKey} {...sharedProps} />;
-        case 'settings':  return <SettingsPage key={refreshKey} {...sharedProps} />;
-        case 'help':      return <HelpPage     key={refreshKey} {...sharedProps} />;
-        default:          return <AgentDashboard key={refreshKey} {...sharedProps} />;
-      }
+      const adminContent = () => {
+        switch (page) {
+          case 'fields':    return <FieldsPage    key={refreshKey} {...sharedProps} />;
+          case 'agents':    return <AgentsPage    key={refreshKey} {...sharedProps} />;
+          case 'analytics': return <AnalyticsPage key={refreshKey} {...sharedProps} />;
+          case 'reports':   return <ReportsPage   key={refreshKey} {...sharedProps} />;
+          case 'settings':  return <SettingsPage  key={refreshKey} {...sharedProps} />;
+          case 'help':      return <HelpPage      key={refreshKey} {...sharedProps} />;
+          default:          return <AdminDashboard key={refreshKey} {...sharedProps} />;
+        }
+      };
+
+      return (
+        <AdminShell
+          activePage={page}
+          onNavigate={navigate}
+          onLogout={handleLogout}
+          user={user}
+        >
+          {adminContent()}
+        </AdminShell>
+      );
+    }
+
+    // Agent pages
+    switch (page) {
+      case 'my-fields': return <MyFieldsPage key={refreshKey} {...sharedProps} />;
+      case 'settings':  return <SettingsPage key={refreshKey} {...sharedProps} />;
+      case 'help':      return <HelpPage     key={refreshKey} {...sharedProps} />;
+      default:          return <AgentDashboard key={refreshKey} {...sharedProps} />;
     }
   }
 
-  // All pages now own their full layout — no Navbar wrapper needed
   return <>{renderPage()}</>;
 }

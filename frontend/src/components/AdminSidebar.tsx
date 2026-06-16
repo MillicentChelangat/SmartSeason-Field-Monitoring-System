@@ -70,7 +70,7 @@ export function AdminSidebar({ activePage, onNavigate, onLogout, user, fieldCoun
       </div>
       
       {/* Nav */}
-<nav style={{ flex: 1, overflowY: 'auto', padding: '12px', minHeight: 0 }}>
+     <nav style={{ flex: 1, overflowY: 'hidden', padding: '12px', minHeight: 0 }}>
   {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
     const isActive = activePage === id;
     const badge = id === 'fields' ? fieldCount : id === 'agents' ? agentCount : undefined;
@@ -106,8 +106,7 @@ export function AdminSidebar({ activePage, onNavigate, onLogout, user, fieldCoun
 </nav>
       {/* User + Logout */}
       <div style={{ padding: '12px 12px 16px', borderTop: '1px solid #f0f4f0', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px', borderRadius: 9, background: '#f9fafb', marginBottom: 6 }}>
-          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#a8e6be', fontWeight: 700, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 10, padding: '10px', borderRadius: 9, background: '#f9fafb', marginBottom: 6, justifyContent: collapsed ? 'center' : 'flex-start' }}>          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#a8e6be', fontWeight: 700, flexShrink: 0 }}>
             {user?.full_name ? initials(user.full_name) : 'A'}
           </div>
           {!collapsed && (

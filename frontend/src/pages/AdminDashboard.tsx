@@ -67,7 +67,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
   const [agentCount, setAgentCount]       = useState(0);
   const [loading, setLoading]             = useState(true);
   const [activePage, setActivePage]       = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen]     = useState(false);
+  const [sidebarOpen, setSidebarOpen]     = useState(true);
   const [isMobile, setIsMobile]           = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -151,14 +151,16 @@ return { ...field, lastUpdate, assignedAgents: [] };        });
 
       {/* ══ SIDEBAR — now white ══ */}
     <aside style={{
-        width: 240, flexShrink: 0, height: '100vh',
-        borderRight: '1px solid #e0f5e0',
-        position: isMobile ? 'fixed' : 'relative',
-        top: 0, left: 0, zIndex: isMobile ? 50 : 'auto',
-        transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
-        transition: 'transform 0.25s ease',
-        boxShadow: isMobile && sidebarOpen ? '6px 0 30px rgba(0,0,0,0.12)' : 'none',
-     }}>
+         width: sidebarOpen ? 240 : 56,
+         flexShrink: 0, height: '100vh',
+         borderRight: '1px solid #e0f5e0',
+         position: isMobile ? 'fixed' : 'relative',
+         top: 0, left: 0, zIndex: isMobile ? 50 : 'auto',
+         transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+         transition: 'width 0.25s ease, transform 0.25s ease',
+         overflow: 'hidden',
+         boxShadow: isMobile && sidebarOpen ? '6px 0 30px rgba(0,0,0,0.12)' : 'none',
+    }}>
        <AdminSidebar
         activePage={activePage}
         onNavigate={handleNav}
@@ -167,6 +169,8 @@ return { ...field, lastUpdate, assignedAgents: [] };        });
         fieldCount={fields.length}
         agentCount={agentCount}
         onClose={() => setSidebarOpen(false)}
+        collapsed={!isMobile && !sidebarOpen} 
+
        />
     </aside>
 

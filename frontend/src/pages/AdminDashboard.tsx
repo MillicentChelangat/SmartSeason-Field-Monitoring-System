@@ -9,6 +9,7 @@ import type { Field, FieldUpdate, Profile } from '../types/database';
 import { StatusBadge } from '../components/StatusBadge';
 import { StageBadge } from '../components/StageBadge';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { AdminShell } from '../components/AdminShell';
 
 interface FieldWithStatus extends Field {
   lastUpdate?: FieldUpdate | null;
@@ -58,7 +59,7 @@ function timeAgo(dateStr: string) {
   return 'just now';
 }
 
-export function AdminDashboard({ onNavigate, user }: Props) {
+export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
   const [fields, setFields]               = useState<FieldWithStatus[]>([]);
   const [recentUpdates, setRecentUpdates] = useState<EnrichedUpdate[]>([]);
   const [agentList, setAgentList]         = useState<Profile[]>([]);
@@ -109,9 +110,11 @@ export function AdminDashboard({ onNavigate, user }: Props) {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#f0f4f0' }}>
-        <LoadingSpinner size="lg" />
-      </div>
+      <AdminShell activePage="dashboard" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#f0f4f0' }}>
+          <LoadingSpinner size="lg" />
+        </div>
+      </AdminShell>
     );
   }
 
@@ -133,32 +136,33 @@ export function AdminDashboard({ onNavigate, user }: Props) {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '24px 24px 40px' }}>
+    <AdminShell activePage="dashboard" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '24px 24px 40px' }}>
 
-      {/* ACTION BAR */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#f3f4f6', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}>
-            <Bell size={16} />
-            {atRisk > 0 && (
-              <span style={{ position: 'absolute', top: 7, right: 7, width: 7, height: 7, borderRadius: '50%', background: '#ef4444', border: '1.5px solid #fff' }} />
-            )}
-          </button>
-          {!isMobile && (
-            <button style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, background: '#f3f4f6', border: 'none', fontSize: 13, fontWeight: 500, cursor: 'pointer', color: '#374151', fontFamily: "'DM Sans', sans-serif" }}>
-              <Download size={14} /> Export
+        {/* ACTION BAR */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#f3f4f6', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}>
+              <Bell size={16} />
+              {atRisk > 0 && (
+                <span style={{ position: 'absolute', top: 7, right: 7, width: 7, height: 7, borderRadius: '50%', background: '#ef4444', border: '1.5px solid #fff' }} />
+              )}
             </button>
-          )}
-          <button
-            onClick={() => onNavigate('fields')}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, background: '#1d6b35', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
-          >
-            <Plus size={14} /> {isMobile ? '' : 'Add Field'}
-          </button>
+            {!isMobile && (
+              <button style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, background: '#f3f4f6', border: 'none', fontSize: 13, fontWeight: 500, cursor: 'pointer', color: '#374151', fontFamily: "'DM Sans', sans-serif" }}>
+                <Download size={14} /> Export
+              </button>
+            )}
+            <button
+              onClick={() => onNavigate('fields')}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, background: '#1d6b35', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+            >
+              <Plus size={14} /> {isMobile ? '' : 'Add Field'}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Welcome banner */}
+        {/* Welcome banner */}
         <div style={{ background: 'linear-gradient(135deg,#0f2e1a,#1d6b35)', borderRadius: 14, padding: isMobile ? '18px 18px' : '22px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden', position: 'relative' }}>
           <div style={{ position: 'absolute', right: -20, top: -20, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
           <div style={{ position: 'absolute', right: 40, bottom: -30, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
@@ -326,7 +330,8 @@ export function AdminDashboard({ onNavigate, user }: Props) {
           )}
         </div>
 
-    </div>
+      </div>
+    </AdminShell>
   );
 }
 

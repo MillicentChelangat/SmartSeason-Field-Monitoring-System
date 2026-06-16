@@ -334,7 +334,6 @@ status: f.status,      }));
             )}
           </div>
         </div>
-      </div>
 
       {/* ── CREATE MODAL ── */}
       {showCreate && (
@@ -417,4 +416,5 @@ status: f.status,      }));
       )}
     </AdminShell>
   );
+
 }

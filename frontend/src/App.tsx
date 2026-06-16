@@ -9,14 +9,14 @@ import { AgentsPage } from './pages/AgentsPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
-import { HelpPage } from './pages/HelpPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { AdminShell } from './components/AdminShell';
 
 
 type Page =
   | 'dashboard' | 'fields' | 'my-fields' | 'agents'
-  | 'field-detail' | 'analytics' | 'reports' | 'settings' | 'help';
+  | 'field-detail' | 'analytics' | 'reports' | 'settings' | 'notifications';
 
 export default function App() {
   const [user, setUser]                       = useState<any>(null);
@@ -74,6 +74,10 @@ export default function App() {
       );
     }
 
+if (page === 'notifications') {
+    return <NotificationsPage key={refreshKey} {...sharedProps} />;
+  }
+    
     if (isAdmin) {
       const adminContent = () => {
         switch (page) {
@@ -82,7 +86,6 @@ export default function App() {
           case 'analytics': return <AnalyticsPage key={refreshKey} {...sharedProps} />;
           case 'reports':   return <ReportsPage   key={refreshKey} {...sharedProps} />;
           case 'settings':  return <SettingsPage  key={refreshKey} {...sharedProps} />;
-          case 'help':      return <HelpPage      key={refreshKey} {...sharedProps} />;
           default:          return <AdminDashboard key={refreshKey} {...sharedProps} />;
         }
       };
@@ -97,13 +100,12 @@ export default function App() {
           {adminContent()}
         </AdminShell>
       );
-    }
+    } 
 
     // Agent pages
     switch (page) {
       case 'my-fields': return <MyFieldsPage key={refreshKey} {...sharedProps} />;
       case 'settings':  return <SettingsPage key={refreshKey} {...sharedProps} />;
-      case 'help':      return <HelpPage     key={refreshKey} {...sharedProps} />;
       default:          return <AgentDashboard key={refreshKey} {...sharedProps} />;
     }
   }

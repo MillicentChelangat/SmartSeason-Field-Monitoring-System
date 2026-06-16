@@ -47,8 +47,18 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#fff', overflow: 'hidden' }}>
 
       {/* Logo */}
-      <div style={{ padding: '22px 20px 18px', borderBottom: '1px solid #f0f4f0', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+ <div style={{ 
+       padding: collapsed ? '22px 8px 18px' : '22px 20px 18px', 
+      borderBottom: '1px solid #f0f4f0', flexShrink: 0, 
+      display: 'flex', alignItems: 'center', 
+      justifyContent: 'space-between' 
+     }}>        <div style={{ 
+           display: 'flex', alignItems: 'center', 
+           gap: collapsed ? 0 : 10,
+           justifyContent: collapsed ? 'center' : 'flex-start',
+           width: '100%'
+  }}>
+         {/* Leaf icon always visible */}
           <div style={{ width: 34, height: 34, background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(45,122,69,0.3)', flexShrink: 0 }}>
             <Leaf size={17} color="#a8e6be" />
           </div>

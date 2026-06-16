@@ -40,7 +40,7 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user, f
       {/* Desktop sidebar */}
       {!isMobile && (
         <aside style={{
-          width: sidebarOpen ? 240 : 0, flexShrink: 0,
+          width: sidebarOpen ? 240 : 56, flexShrink: 0,
           height: '100vh', overflow: 'hidden',
           borderRight: sidebarOpen ? '1px solid #e0f5e0' : 'none',
           transition: 'width 0.25s ease',
@@ -49,6 +49,7 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user, f
             activePage={activePage} onNavigate={onNavigate}
             onLogout={onLogout} user={user}
             fieldCount={fieldCount} agentCount={agentCount}
+              collapsed={!sidebarOpen} 
           />
         </aside>
       )}
@@ -63,6 +64,7 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user, f
               onLogout={onLogout} user={user}
               fieldCount={fieldCount} agentCount={agentCount}
               onClose={() => setMobileOpen(false)}
+              collapsed={false}
             />
           </div>
         </div>

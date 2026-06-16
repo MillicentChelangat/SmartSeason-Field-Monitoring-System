@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   Leaf, MapPin, Users, AlertTriangle,
   CheckCircle2, Activity, TrendingUp,  Download,
-  Plus, Menu, X, Bell, ChevronRight,
+  Plus, Menu, Bell, ChevronRight,
 } from 'lucide-react';
 import API from '../api/api.ts';
 import type { Field, FieldUpdate, Profile } from '../types/database';
@@ -185,7 +185,7 @@ return { ...field, lastUpdate, assignedAgents: [] };        });
               onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={e => e.currentTarget.style.background = 'none'}
             >
-              {isMobile && sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            <Menu size={20} />
             </button>
             {/* Title only — date removed */}
             <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', lineHeight: 1, margin: 0 }}>Dashboard</h1>

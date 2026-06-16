@@ -30,7 +30,7 @@ function initials(name: string) {
 
 export function AdminSidebar({ activePage, onNavigate, onLogout, user, fieldCount, agentCount, onClose, collapsed }: Props) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#ffffff' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#ffffff', overflow: 'hidden', fontFamily: "'DM Sans', sans-serif" }}>
 
       {/* Logo */}
       <div style={{ padding: '22px 20px 18px', borderBottom: '1px solid #f0f4f0', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -59,14 +59,14 @@ export function AdminSidebar({ activePage, onNavigate, onLogout, user, fieldCoun
       </div>
       
       {/* Nav */}
-     <nav style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-     {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+<nav style={{ flex: 1, overflowY: 'auto', padding: '12px', minHeight: 0 }}>
+  {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
     const isActive = activePage === id;
     const badge = id === 'fields' ? fieldCount : id === 'agents' ? agentCount : undefined;
     return (
       <button key={id}
         onClick={() => { onNavigate(id); onClose?.(); }}
-        title={collapsed ? label : undefined}  
+        title={collapsed ? label : undefined}
         style={{
           width: '100%', display: 'flex', alignItems: 'center',
           gap: collapsed ? 0 : 10,
@@ -83,9 +83,7 @@ export function AdminSidebar({ activePage, onNavigate, onLogout, user, fieldCoun
         onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#6b7280'; }}}
       >
         <Icon size={16} />
-        {/* Hide label when collapsed */}
         {!collapsed && <span style={{ flex: 1 }}>{label}</span>}
-        {/* Hide badge when collapsed */}
         {!collapsed && badge !== undefined && (
           <span style={{ background: isActive ? '#1d6b35' : '#e85d3a', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 7px', borderRadius: 20 }}>
             {badge}

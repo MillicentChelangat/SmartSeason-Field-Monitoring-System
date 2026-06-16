@@ -125,9 +125,8 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
           {!isCollapsed && <span>Sign out</span>}
         </button>
       </div>
-    </div>
   );
-
+ 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#eef2ee', fontFamily: "'DM Sans', sans-serif" }}>
 

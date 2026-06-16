@@ -35,7 +35,7 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user, f
   }, [isMobile]);
 
   return (
-<div style={{ flex: 1, overflowY: 'auto' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#eef2ee', fontFamily: "'DM Sans', sans-serif" }}>
 
       {/* Desktop sidebar */}
       {!isMobile && (
@@ -49,7 +49,7 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user, f
             activePage={activePage} onNavigate={onNavigate}
             onLogout={onLogout} user={user}
             fieldCount={fieldCount} agentCount={agentCount}
-              collapsed={!sidebarOpen} 
+            collapsed={!sidebarOpen}
           />
         </aside>
       )}
@@ -96,24 +96,24 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user, f
 
         {/* Desktop hamburger */}
         {!isMobile && (
-         <div style={{ 
-            height: 48, flexShrink: 0, display: 'flex', 
+          <div style={{
+            height: 48, flexShrink: 0, display: 'flex',
             alignItems: 'center', padding: '0 16px',
-            borderBottom: '1px solid #f0f4f0', background: '#fff'
-              }}>
-           <button onClick={() => setSidebarOpen(p => !p)}
-               style={{ width: 32, height: 32, borderRadius: 8, background: '#f9fafb', border: '1px solid #e8ede8', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280' }}>
-               <Menu size={15} />
+            borderBottom: '1px solid #f0f4f0', background: '#fff',
+          }}>
+            <button onClick={() => setSidebarOpen(p => !p)}
+              style={{ width: 32, height: 32, borderRadius: 8, background: '#f9fafb', border: '1px solid #e8ede8', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280' }}>
+              <Menu size={15} />
             </button>
             <span style={{ marginLeft: 12, fontSize: 14, fontWeight: 600, color: '#374151' }}>
-            {PAGE_TITLES[activePage] || ''}
+              {PAGE_TITLES[activePage] || ''}
             </span>
           </div>
         )}
 
-        {/* Page content */}
-         <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '12px 12px 24px' : '16px 16px 24px' }}>
-  {children}
+        {/* Page content — scroll happens here */}
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {children}
         </div>
       </div>
     </div>

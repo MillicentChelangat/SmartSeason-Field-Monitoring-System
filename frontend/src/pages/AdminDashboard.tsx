@@ -133,13 +133,10 @@ export function AdminDashboard({ onNavigate, user }: Props) {
   ];
 
   return (
-    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '24px 24px 40px' }}>
 
-      {/* TOPBAR */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 30, background: '#fff', borderBottom: '1px solid #e2e8e2', padding: '0 20px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', lineHeight: 1, margin: 0 }}>Dashboard</h1>
-        </div>
+      {/* ACTION BAR */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#f3f4f6', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}>
             <Bell size={16} />
@@ -159,12 +156,9 @@ export function AdminDashboard({ onNavigate, user }: Props) {
             <Plus size={14} /> {isMobile ? '' : 'Add Field'}
           </button>
         </div>
-      </header>
+      </div>
 
-      {/* PAGE CONTENT */}
-      <main style={{ padding: isMobile ? '16px 14px 32px' : '24px 24px 40px', display: 'flex', flexDirection: 'column', gap: isMobile ? 14 : 20 }}>
-
-        {/* Welcome banner */}
+      {/* Welcome banner */}
         <div style={{ background: 'linear-gradient(135deg,#0f2e1a,#1d6b35)', borderRadius: 14, padding: isMobile ? '18px 18px' : '22px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden', position: 'relative' }}>
           <div style={{ position: 'absolute', right: -20, top: -20, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
           <div style={{ position: 'absolute', right: 40, bottom: -30, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
@@ -332,7 +326,6 @@ export function AdminDashboard({ onNavigate, user }: Props) {
           )}
         </div>
 
-      </main>
     </div>
   );
 }

@@ -103,14 +103,12 @@ export function AgentsPage({ onNavigate, onLogout, user }: Props) {
   return (
     <AdminShell activePage="agents" onNavigate={onNavigate} onLogout={onLogout} user={user}>
 
-      {/* Topbar */}
-      <div style={{ background: '#fff', borderRadius: 12, padding: '0 18px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, marginBottom: 10 }}>
-        <div>
-          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111' }}>Field Agents</h1>
-          <p style={{ fontSize: 11, color: '#888', marginTop: 1 }}>{agents.length} registered agent{agents.length !== 1 ? 's' : ''}</p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Search */}
+
+      {/* Body: agent grid + detail panel */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 0 }}>
+
+        {/* Action row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexShrink: 0 }}>
           <div style={{ position: 'relative' }}>
             <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: '#aaa' }} />
             <input
@@ -127,10 +125,9 @@ export function AgentsPage({ onNavigate, onLogout, user }: Props) {
             <Plus size={13} /> Register Agent
           </button>
         </div>
-      </div>
 
-      {/* Body: agent grid + detail panel */}
-      <div style={{ flex: 1, display: 'flex', gap: 10, minHeight: 0 }}>
+        <div style={{ flex: 1, display: 'flex', gap: 10, minHeight: 0 }}>
+        </div>
 
         {/* Agent Grid */}
         <div style={{ flex: 1, overflowY: 'auto' }}>

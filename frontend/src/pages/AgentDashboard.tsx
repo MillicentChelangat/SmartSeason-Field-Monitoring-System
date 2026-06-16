@@ -79,10 +79,10 @@ export function AgentDashboard({ onNavigate, onLogout, user }: Props) {
     );
   }
 
-  const active    = fields.filter(f => f.status === 'active').length;
-  const atRisk    = fields.filter(f => f.status === 'at_risk').length;
-  const completed = fields.filter(f => f.status === 'completed').length;
-  const atRiskFields = fields.filter(f => f.status === 'at_risk');
+  const active    = fields.filter(f => f.status === 'healthy' || f.status === 'monitor').length;
+  const atRisk    = fields.filter(f => f.status === 'at_risk' || f.status === 'critical').length;
+  const completed = fields.filter(f => f.current_stage === 'harvested').length;
+  const atRiskFields = fields.filter(f => f.status === 'at_risk' || f.status === 'critical');
 
   const statCards = [
     { label: 'My Fields',  value: fields.length, icon: <MapPin size={14} color="#1d6b35" />,        iconBg: '#e8f5ee', valueColor: '#111', trend: 'total assigned',     trendColor: '#888' },

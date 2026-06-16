@@ -77,18 +77,11 @@ export function SettingsPage({ onNavigate, onLogout, user }: Props) {
   return (
     <Shell activePage="settings" onNavigate={onNavigate} onLogout={onLogout} user={user}>
 
-      {/* Topbar */}
-      <div style={{ background: '#fff', borderRadius: 12, padding: '0 18px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, marginBottom: 10 }}>
-        <div>
-          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111' }}>Settings</h1>
-          <p style={{ fontSize: 11, color: '#888', marginTop: 1 }}>Manage your account and preferences</p>
+      {saved && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#e8f5ee', color: '#1d6b35', fontSize: 12, fontWeight: 500, padding: '6px 14px', borderRadius: 8, marginBottom: 10, alignSelf: 'flex-start' }}>
+          <Save size={13} /> Changes saved!
         </div>
-        {saved && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#e8f5ee', color: '#1d6b35', fontSize: 12, fontWeight: 500, padding: '6px 14px', borderRadius: 8 }}>
-            <Save size={13} /> Changes saved!
-          </div>
-        )}
-      </div>
+      )}
 
       <div style={{ flex: 1, display: 'flex', gap: 10, minHeight: 0 }}>
 

@@ -119,40 +119,22 @@ status: f.status,      }));
   return (
     <AdminShell activePage="fields" onNavigate={onNavigate} onLogout={onLogout} user={user}>
 
-      {/* ── TOPBAR ── */}
-      <div style={{
-        background: '#fff', borderRadius: 12,
-        padding: '0 20px', height: 60,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexShrink: 0, marginBottom: 14,
-        borderBottom: '1px solid #f0f2ee',
-      }}>
-        <div>
-          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', margin: 0 }}>Fields</h1>
-          <p style={{ fontSize: 11.5, color: '#9ca3af', margin: 0, marginTop: 2 }}>{fields.length} fields total</p>
-        </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            padding: '8px 16px', borderRadius: 8,
-            background: '#1d6b35', color: '#fff',
-            border: 'none', fontSize: 13, fontWeight: 600,
-            cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-          }}
-        >
-          <Plus size={14} /> New Field
-        </button>
-      </div>
-
-      {/* ── BODY ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
-
-        {/* Filter tabs + Search row */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           gap: 12, flexShrink: 0, flexWrap: 'wrap',
         }}>
+          <button
+            onClick={() => setShowCreate(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '8px 16px', borderRadius: 8,
+              background: '#1d6b35', color: '#fff',
+              border: 'none', fontSize: 13, fontWeight: 600,
+              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            <Plus size={14} /> New Field
+          </button>
           {/* Stage pill tabs in a contained bar */}
           <div style={{
             display: 'flex', alignItems: 'center', gap: 4,

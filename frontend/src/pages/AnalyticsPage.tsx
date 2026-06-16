@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { BarChart2, TrendingUp, AlertTriangle, Users, MapPin, Activity, Menu } from 'lucide-react';
+import { BarChart2, TrendingUp, AlertTriangle, Users, MapPin, Activity } from 'lucide-react';
 import API from '../api/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { AdminSidebar } from '../components/AdminSidebar';   
+import { AdminShell } from '../components/AdminShell';
 
 interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
@@ -127,7 +127,7 @@ status: f.status,  }));
   const avgUpdatesPerField = fields.length ? (totalUpdates / fields.length).toFixed(1) : '0';
 
   return (
-    <>
+    <AdminShell activePage="analytics" onNavigate={onNavigate} onLogout={onLogout} user={user}>
       <style>{`
         .analytics-stat-grid {
           display: grid;
@@ -168,22 +168,6 @@ status: f.status,  }));
           margin: 0 0 16px;
         }
       `}</style>
-
-        {/* Topbar */}
-        <div style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', marginBottom: 14, border: '1px solid #e8ede8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-         <button
-        onClick={() => onNavigate('toggle-sidebar')}
-         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
-        >
-        <Menu size={20} color="#555" />
-       </button>
-        <div>
-          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', margin: 0 }}>Analytics</h1>
-          <p style={{ fontSize: 11.5, color: '#9ca3af', margin: 0, marginTop: 2 }}>Farm performance overview</p>
-       </div>
-       </div>
-       </div>
 
         {/* Stat cards — 2 cols on mobile, 4 on desktop */}
         <div className="analytics-stat-grid" style={{ marginBottom: 14 }}>
@@ -254,6 +238,6 @@ status: f.status,  }));
           <p className="analytics-card-sub">At-risk flags logged per month</p>
           <MiniBarChart data={atRiskByMonth} color="#e85d3a" />
         </div>
-    </>
+    </AdminShell>
   );
 }

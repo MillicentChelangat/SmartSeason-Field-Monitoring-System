@@ -177,11 +177,30 @@ export function ReportsPage({ onNavigate, onLogout, user }: Props) {
 
       <AdminShell activePage="reports" onNavigate={onNavigate} onLogout={onLogout} user={user}>
 
-        {/* Topbar */}
-        <div style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', marginBottom: 14, border: '1px solid #e8ede8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: '#111', margin: 0 }}>Reports</h1>
-            <p style={{ fontSize: 11.5, color: '#9ca3af', margin: 0, marginTop: 2 }}>View and export field & agent reports</p>
+        {/* Tabs + Export */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 14 }}>
+          <div style={{ display: 'flex', gap: 8 }}>     
+          {([['fields', 'Field Reports', <MapPin size={13} />], ['agents', 'Agent Reports', <Users size={13} />]] as const).map(([id, label, icon]) => (
+            <button
+              key={id}
+              onClick={() => { setTab(id as Tab); setExpanded(null); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '9px 16px', borderRadius: 9,
+                fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                background: tab === id ? '#1d6b35' : '#fff',
+                color: tab === id ? '#fff' : '#555',
+                fontFamily: "'DM Sans', sans-serif",
+                boxShadow: tab === id ? '0 2px 8px rgba(29,107,53,0.25)' : 'none',
+                border: tab === id ? 'none' : '1px solid #e8ede8',
+                } as any}
+            >
+              {icon} {label}
+              <span style={{ background: tab === id ? 'rgba(255,255,255,0.25)' : '#f0f2ee', color: tab === id ? '#fff' : '#888', fontSize: 10.5, fontWeight: 600, padding: '1px 7px', borderRadius: 10 }}>
+                {id === 'fields' ? fields.length : agents.length}
+              </span>
+            </button>
+          ))}
           </div>
           <button
             onClick={tab === 'fields' ? exportFieldsCSV : exportAgentsCSV}
@@ -190,31 +209,6 @@ export function ReportsPage({ onNavigate, onLogout, user }: Props) {
             <Download size={13} />
             {!isMobile && ' Export CSV'}
           </button>
-        </div>
-
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-          {([['fields', 'Field Reports', <MapPin size={13} />], ['agents', 'Agent Reports', <Users size={13} />]] as const).map(([id, label, icon]) => (
-            <button
-              key={id}
-              onClick={() => { setTab(id as Tab); setExpanded(null); }}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '9px 16px', borderRadius: 9,
-                fontSize: 13, fontWeight: 500, cursor: 'pointer', border: 'none',
-                background: tab === id ? '#1d6b35' : '#fff',
-                color: tab === id ? '#fff' : '#555',
-                fontFamily: "'DM Sans', sans-serif",
-                boxShadow: tab === id ? '0 2px 8px rgba(29,107,53,0.25)' : 'none',
-                border: tab === id ? 'none' : '1px solid #e8ede8',
-              } as any}
-            >
-              {icon} {label}
-              <span style={{ background: tab === id ? 'rgba(255,255,255,0.25)' : '#f0f2ee', color: tab === id ? '#fff' : '#888', fontSize: 10.5, fontWeight: 600, padding: '1px 7px', borderRadius: 10 }}>
-                {id === 'fields' ? fields.length : agents.length}
-              </span>
-            </button>
-          ))}
         </div>
 
         {/* ── MOBILE VIEW — cards ── */}

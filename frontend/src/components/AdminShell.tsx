@@ -96,17 +96,24 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user, f
 
         {/* Desktop hamburger */}
         {!isMobile && (
-          <div style={{ position: 'absolute', top: 14, left: sidebarOpen ? 254 : 14, zIndex: 20, transition: 'left 0.25s ease' }}>
-            <button onClick={() => setSidebarOpen(p => !p)}
-              style={{ width: 32, height: 32, borderRadius: 8, background: '#fff', border: '1px solid #e8ede8', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-              <Menu size={15} />
+         <div style={{ 
+            height: 48, flexShrink: 0, display: 'flex', 
+            alignItems: 'center', padding: '0 16px',
+            borderBottom: '1px solid #f0f4f0', background: '#fff'
+              }}>
+           <button onClick={() => setSidebarOpen(p => !p)}
+               style={{ width: 32, height: 32, borderRadius: 8, background: '#f9fafb', border: '1px solid #e8ede8', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280' }}>
+               <Menu size={15} />
             </button>
+            <span style={{ marginLeft: 12, fontSize: 14, fontWeight: 600, color: '#374151' }}>
+            {PAGE_TITLES[activePage] || ''}
+            </span>
           </div>
         )}
 
         {/* Page content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '12px 12px 24px' : '12px 16px 24px 56px' }}>
-          {children}
+         <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '12px 12px 24px' : '16px 16px 24px' }}>
+  {children}
         </div>
       </div>
     </div>

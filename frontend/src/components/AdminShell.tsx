@@ -35,7 +35,7 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user, f
   }, [isMobile]);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#eef2ee', fontFamily: "'DM Sans', sans-serif" }}>
+<div style={{ flex: 1, overflowY: 'auto' }}>
 
       {/* Desktop sidebar */}
       {!isMobile && (

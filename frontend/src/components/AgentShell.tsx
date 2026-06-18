@@ -110,23 +110,15 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
   <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#a8e6be', fontWeight: 700, flexShrink: 0 }}>
     {user?.full_name ? initials(user.full_name) : 'A'}
   </div>
-  {!isCollapsed && (
+    {!isCollapsed && (
     <div style={{ minWidth: 0, flex: 1 }}>
       <p style={{ fontSize: 12.5, color: '#111', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
         {user?.full_name || 'Agent'}
       </p>
       <p style={{ fontSize: 10.5, color: '#9ca3af', margin: 0 }}>Field Agent</p>
     </div>
-  )}
+    )}
 </div>
-          {!isCollapsed && (
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <p style={{ fontSize: 12.5, color: '#111', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
-                {user?.full_name || 'Agent'}
-              </p>
-              <p style={{ fontSize: 10.5, color: '#9ca3af', margin: 0 }}>Field Agent</p>
-            </div>
-          )}
         </div>
         <button onClick={onLogout}
           style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderRadius: 8, color: '#ef4444', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s', fontWeight: 500, justifyContent: isCollapsed ? 'center' : 'flex-start' }}
@@ -140,7 +132,7 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
   );
  
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#eef2ee', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ display: 'flex', height: '100%', overflow: 'hidden', background: '#eef2ee', fontFamily: "'DM Sans', sans-serif" }}>
 
       {/* Desktop sidebar */}
       {!isMobile && (

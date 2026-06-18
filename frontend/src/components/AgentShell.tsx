@@ -13,7 +13,6 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'my-fields', label: 'My Fields', icon: MapPin },
   { id: 'notifications', label: 'Notifications', icon: Bell },
-
   { id: 'settings',  label: 'Settings',  icon: Settings },
 ];
 
@@ -48,12 +47,13 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#fff', overflow: 'hidden' }}>
 
       {/* Logo */}
- <div style={{ 
-       padding: collapsed ? '22px 8px 18px' : '22px 20px 18px', 
+     <div style={{ 
+      padding: collapsed ? '22px 8px 18px' : '22px 20px 18px', 
       borderBottom: '1px solid #f0f4f0', flexShrink: 0, 
       display: 'flex', alignItems: 'center', 
       justifyContent: 'space-between' 
-     }}>        <div style={{ 
+     }}>       
+      <div style={{ 
            display: 'flex', alignItems: 'center', 
            gap: collapsed ? 0 : 10,
            justifyContent: collapsed ? 'center' : 'flex-start',

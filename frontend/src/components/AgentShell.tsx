@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Leaf, LayoutDashboard, MapPin, LogOut, Menu, BarChart2, Settings } from 'lucide-react';
+import { Leaf, LayoutDashboard, MapPin, LogOut, Menu, Settings, Bell } from 'lucide-react';
 
 interface Props {
   children: React.ReactNode;
@@ -12,7 +12,8 @@ interface Props {
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'my-fields', label: 'My Fields', icon: MapPin },
-  { id: 'analytics', label: 'Analytics', icon: BarChart2 },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+
   { id: 'settings',  label: 'Settings',  icon: Settings },
 ];
 
@@ -44,7 +45,7 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
   const collapsed = !isMobile && !sidebarOpen;
 
   const SidebarContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#fff', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#fff', overflow: 'hidden' }}>
 
       {/* Logo */}
  <div style={{ 
@@ -105,8 +106,19 @@ export function AgentShell({ children, activePage, onNavigate, onLogout, user }:
 
       {/* User + Logout */}
       <div style={{ padding: '12px 12px 16px', borderTop: '1px solid #f0f4f0', flexShrink: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: isCollapsed ? 0 : 10, padding: '10px', borderRadius: 9, background: '#f9fafb', marginBottom: 6, justifyContent: isCollapsed ? 'center' : 'flex-start' }}>            {user?.full_name ? initials(user.full_name) : 'A'}
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isCollapsed ? 0 : 10, padding: '10px', borderRadius: 9, background: '#f9fafb', marginBottom: 6, justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
+  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#2d7a45,#1a5c30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#a8e6be', fontWeight: 700, flexShrink: 0 }}>
+    {user?.full_name ? initials(user.full_name) : 'A'}
+  </div>
+  {!isCollapsed && (
+    <div style={{ minWidth: 0, flex: 1 }}>
+      <p style={{ fontSize: 12.5, color: '#111', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
+        {user?.full_name || 'Agent'}
+      </p>
+      <p style={{ fontSize: 10.5, color: '#9ca3af', margin: 0 }}>Field Agent</p>
+    </div>
+  )}
+</div>
           {!isCollapsed && (
             <div style={{ minWidth: 0, flex: 1 }}>
               <p style={{ fontSize: 12.5, color: '#111', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>

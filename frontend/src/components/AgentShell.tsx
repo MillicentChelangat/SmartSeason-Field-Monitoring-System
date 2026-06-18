@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Leaf, LayoutDashboard, MapPin, LogOut, Menu, Settings, Bell } from 'lucide-react';
+import { Leaf, LayoutDashboard, MapPin, LogOut, Menu, Settings, Bell, User } from 'lucide-react';
 
 interface Props {
   children: React.ReactNode;
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { id: 'my-fields', label: 'My Fields', icon: MapPin },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'settings',  label: 'Settings',  icon: Settings },
+  { id: 'profile',  label: 'Profile',  icon: User },
 ];
 
 function initials(name: string) {

@@ -13,7 +13,7 @@ from apps.agent.services.agent_service import (
 def get_fields(request):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
-    return JsonResponse({"error": "Unauthorized"}, status=401)
+        return JsonResponse({"error": "Unauthorized"}, status=401)
     return JsonResponse(get_fields_for_agent(user_id), safe=False)
 
 @csrf_exempt

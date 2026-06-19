@@ -9,7 +9,6 @@ from apps.agent.services.agent_service import (
 
 @csrf_exempt
 @require_GET
-@csrf_exempt
 def get_fields(request):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
@@ -18,7 +17,6 @@ def get_fields(request):
 
 @csrf_exempt
 @require_GET
-@csrf_exempt
 def get_updates(request):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:

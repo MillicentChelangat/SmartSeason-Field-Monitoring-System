@@ -247,3 +247,25 @@ def get_field_agents(request, id):
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid ID'}, status=400)
     return JsonResponse(list(field_service.get_agents_for_field(id)), safe=False)
+
+@csrf_exempt
+@require_http_methods(["PATCH"])
+def update_field(request, id):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        id = int(id)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid ID'}, status=400)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    try:
+        field = field_service.update_field(id, data)
+    except Field.DoesNotExist:
+        return JsonResponse({'error': 'Field not found'}, status=404)
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'message': 'Field updated', 'field': {'id': field.id, 'name': field.name}})

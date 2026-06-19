@@ -58,6 +58,26 @@ def add_field_update(field_id, stage, notes='', agent_id=None):
         field=field, agent_id=agent_id, stage=stage, notes=notes
     )
 
+def update_field(id, data):
+    try:
+        field = Field.objects.get(id=id)
+    except Field.DoesNotExist:
+        raise ValueError("Field not found")
+    
+    if 'name' in data:
+        field.name = data['name']
+    if 'crop_type' in data:
+        field.crop_type = data['crop_type']
+    if 'planting_date' in data:
+        field.planting_date = data['planting_date']
+    if 'current_stage' in data:
+        field.current_stage = data['current_stage']
+    if 'location' in data:
+        field.location = data['location']
+    
+    field.save()
+    return field
+
 
 def get_all_field_updates():
     updates = FieldUpdate.objects.all().order_by('-created_at').select_related('agent')

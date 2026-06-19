@@ -2,14 +2,16 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.fields.services import auth_service, field_service
+from django.views.decorators.http import require_GET, require_http_methods
+from apps.agent.services.agent_service import get_user_id_from_token
+
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 @csrf_exempt
+@require_http_methods(["POST"])  
 def register_api(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
     try:
         data = json.loads(request.body)
     except Exception:
@@ -31,9 +33,8 @@ def register_api(request):
 
 
 @csrf_exempt
+@require_http_methods(["POST"])
 def login_api(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
     try:
         data = json.loads(request.body)
     except Exception:
@@ -58,9 +59,8 @@ def login_api(request):
 
 
 @csrf_exempt
+@require_http_methods(["POST"])
 def register_agent(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
     try:
         data = json.loads(request.body)
     except Exception:
@@ -79,23 +79,36 @@ def register_agent(request):
 
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
-
+@csrf_exempt
 def dashboard(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Not authenticated'}, status=401)
-    data = field_service.get_dashboard_data(request.user)
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    data = field_service.get_dashboard_data(user_id)
     return JsonResponse(data)
 
 
 # ── Fields ────────────────────────────────────────────────────────────────────
 
 @csrf_exempt
+@require_GET
 def get_fields(request):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
     return JsonResponse(list(field_service.get_all_fields()), safe=False)
 
 
 @csrf_exempt
+@require_GET
 def get_field_detail(request, id):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        id = int(id)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid ID'}, status=400)
     field = field_service.get_field_by_id(id)
     if not field:
         return JsonResponse({'error': 'Field not found'}, status=404)
@@ -103,9 +116,11 @@ def get_field_detail(request, id):
 
 
 @csrf_exempt
+@require_http_methods(["POST"])
 def create_field(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
     try:
         data = json.loads(request.body)
     except Exception:
@@ -125,9 +140,15 @@ def create_field(request):
 
 
 @csrf_exempt
+@require_http_methods(["POST"])
 def assign_field(request, id):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        id = int(id)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid ID'}, status=400)
     try:
         data = json.loads(request.body)
     except Exception:
@@ -141,9 +162,11 @@ def assign_field(request, id):
 
 
 @csrf_exempt
+@require_http_methods(["DELETE"])
 def delete_field(request, id):
-    if request.method != 'DELETE':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
     try:
         field_service.delete_field(id)
     except Exception:
@@ -154,19 +177,38 @@ def delete_field(request, id):
 # ── Field updates ─────────────────────────────────────────────────────────────
 
 @csrf_exempt
+@require_GET
 def get_field_updates(request):
-    return JsonResponse(field_service.get_all_field_updates(), safe=False)
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    return JsonResponse(list(field_service.get_all_field_updates()), safe=False)
+   
 
 
 @csrf_exempt
+@require_GET
 def get_field_updates_by_id(request, id):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        id = int(id)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid ID'}, status=400)
     return JsonResponse(list(field_service.get_updates_for_field(id)), safe=False)
 
 
 @csrf_exempt
+@require_http_methods(["POST"])
 def add_field_update(request, id):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        id = int(id)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid ID'}, status=400)
     try:
         data = json.loads(request.body)
     except Exception:
@@ -186,10 +228,22 @@ def add_field_update(request, id):
 # ── Agents ────────────────────────────────────────────────────────────────────
 
 @csrf_exempt
+@require_GET
 def get_agents(request):
-    return JsonResponse(field_service.get_all_agents(), safe=False)
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    return JsonResponse(list(field_service.get_all_agents()), safe=False)
 
 
 @csrf_exempt
+@require_GET
 def get_field_agents(request, id):
-    return JsonResponse(field_service.get_agents_for_field(id), safe=False)
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        id = int(id)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid ID'}, status=400)
+    return JsonResponse(list(field_service.get_agents_for_field(id)), safe=False)

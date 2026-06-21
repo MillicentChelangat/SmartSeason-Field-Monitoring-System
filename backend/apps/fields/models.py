@@ -50,3 +50,39 @@ class FieldUpdate(models.Model):
 
     def __str__(self):
         return f"Update on {self.field.name} by {self.agent}"
+        
+class FieldIssue(models.Model):
+    ISSUE_TYPE_CHOICES = [
+        ('pest', 'Pest Infestation'),
+        ('disease', 'Crop Disease'),
+        ('drought', 'Drought / Water Stress'),
+        ('flood', 'Flood / Waterlogging'),
+        ('crop_failure', 'Crop Failure'),
+        ('poor_germination', 'Poor Germination'),
+        ('nutrient_deficiency', 'Nutrient Deficiency'),
+        ('other', 'Other'),
+    ]
+
+    SEVERITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+    ]
+
+    STATUS_CHOICES = [
+        ('open', 'Open'),
+        ('in_progress', 'In Progress'),
+        ('resolved', 'Resolved'),
+    ]
+
+    field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='issues')
+    reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='reported_issues')
+    issue_type = models.CharField(max_length=30, choices=ISSUE_TYPE_CHOICES)
+    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES, default='low')
+    description = models.TextField(blank=True, default='')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.issue_type} on {self.field.name} ({self.severity})"

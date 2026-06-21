@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from apps.fields.services import auth_service, field_service
 from django.views.decorators.http import require_GET, require_http_methods
 from apps.agent.services.agent_service import get_user_id_from_token
-
+from apps.fields.models import Field
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -264,8 +264,8 @@ def update_field(request, id):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     try:
         field = field_service.update_field(id, data)
-    except Field.DoesNotExist:
-        return JsonResponse({'error': 'Field not found'}, status=404)
-    except ValueError as e:
+    except Exception as e:
+        if 'not found' in str(e).lower():
+            return JsonResponse({'error': 'Field not found'}, status=404)
         return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'message': 'Field updated', 'field': {'id': field.id, 'name': field.name}})

@@ -8,6 +8,7 @@ interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
   user: any;
+  openIssuesCount: number;
 }
 
 const STAGE_COLORS: Record<string, string> = {
@@ -50,7 +51,7 @@ function MiniBarChart({ data, color }: { data: { label: string; value: number }[
   );
 }
 
-export function AnalyticsPage({ onNavigate, onLogout, user }: Props) {
+export function AnalyticsPage({ onNavigate, onLogout, user, openIssuesCount }: Props) {
   const [fields, setFields]   = useState<any[]>([]);
   const [updates, setUpdates] = useState<any[]>([]);
   const [agents, setAgents]   = useState<any[]>([]);
@@ -127,7 +128,7 @@ status: f.status,  }));
   const avgUpdatesPerField = fields.length ? (totalUpdates / fields.length).toFixed(1) : '0';
 
   return (
-    <AdminShell activePage="analytics" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+    <AdminShell activePage="analytics" onNavigate={onNavigate} onLogout={onLogout} user={user} openIssuesCount={openIssuesCount}>
       <style>{`
         .analytics-stat-grid {
           display: grid;

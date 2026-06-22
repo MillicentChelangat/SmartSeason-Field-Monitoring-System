@@ -10,15 +10,17 @@ interface Props {
   user: any;
   fieldCount?: number;
   agentCount?: number;
+  openIssuesCount?: number;
+
 }
 
 const PAGE_TITLES: Record<string, string> = {
-  dashboard: 'Dashboard', fields: 'Fields', agents: 'Agents',
+  dashboard: 'Dashboard', fields: 'Fields', agents: 'Agents', issues: 'Issues',
   analytics: 'Analytics', reports: 'Reports',
   settings: 'Settings', help: 'Help & Support',
 };
 
-export function AdminShell({ children, activePage, onNavigate, onLogout, user, fieldCount, agentCount }: Props) {
+export function AdminShell({ children, activePage, onNavigate, onLogout, user, fieldCount, agentCount, openIssuesCount }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen]   = useState(false);
   const [isMobile, setIsMobile]       = useState(false);
@@ -48,7 +50,8 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user, f
           <AdminSidebar
             activePage={activePage} onNavigate={onNavigate}
             onLogout={onLogout} user={user}
-            fieldCount={fieldCount} agentCount={agentCount}
+            fieldCount={fieldCount} agentCount={agentCount} 
+            openIssuesCount={openIssuesCount}
             collapsed={!sidebarOpen}
           />
         </aside>
@@ -62,7 +65,8 @@ export function AdminShell({ children, activePage, onNavigate, onLogout, user, f
             <AdminSidebar
               activePage={activePage} onNavigate={onNavigate}
               onLogout={onLogout} user={user}
-              fieldCount={fieldCount} agentCount={agentCount}
+              fieldCount={fieldCount} agentCount={agentCount} 
+              openIssuesCount={openIssuesCount}
               onClose={() => setMobileOpen(false)}
               collapsed={false}
             />

@@ -39,9 +39,10 @@ interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
   user: any;
+  openIssuesCount: number;
 }
 
-export function AgentsPage({ onNavigate, onLogout, user }: Props) {
+export function AgentsPage({ onNavigate, onLogout, user, openIssuesCount }: Props) {
   const [agents, setAgents]       = useState<Agent[]>([]);
   const [loading, setLoading]     = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -101,7 +102,7 @@ export function AgentsPage({ onNavigate, onLogout, user }: Props) {
   }
 
   return (
-    <AdminShell activePage="agents" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+    <AdminShell activePage="agents" onNavigate={onNavigate} onLogout={onLogout} user={user} openIssuesCount={openIssuesCount}>
 
 
       {/* Body: agent grid + detail panel */}

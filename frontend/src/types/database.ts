@@ -40,3 +40,31 @@ export interface FieldWithExtras extends Field {
 export interface FieldUpdateWithAgent extends FieldUpdate {
   agent?: Profile;
 }
+
+export type IssueType = 
+  | 'pest' 
+  | 'disease' 
+  | 'drought' 
+  | 'flood' 
+  | 'crop_failure' 
+  | 'poor_germination' 
+  | 'nutrient_deficiency' 
+  | 'other'
+
+export type IssueSeverity = 'low' | 'medium' | 'high'
+
+export type IssueStatus = 'open' | 'in_progress' | 'resolved'
+
+export interface FieldIssue {
+  id: number
+  field_id: number
+  field_name: string
+  reported_by_id: number
+  reported_by_name: string
+  issue_type: IssueType
+  severity: IssueSeverity
+  description: string
+  status: IssueStatus
+  created_at: string
+  updated_at: string
+}

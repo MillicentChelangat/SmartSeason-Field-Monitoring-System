@@ -11,11 +11,12 @@ import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { LoadingSpinner } from './components/LoadingSpinner';
-
+import { IssuesPage } from './pages/IssuesPage';
+import { getOpenIssuesCount } from './api/api'
 
 type Page =
   | 'dashboard' | 'fields' | 'my-fields' | 'agents'
-  | 'field-detail' | 'analytics' | 'reports' | 'settings' | 'notifications';
+  | 'field-detail' | 'analytics' | 'reports' | 'settings' | 'notifications' | 'issues';
 
 export default function App() {
   const [user, setUser]                       = useState<any>(null);
@@ -23,8 +24,9 @@ export default function App() {
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [loading, setLoading]                 = useState(true);
   const [refreshKey, setRefreshKey]           = useState(0);
+  const [openIssuesCount, setOpenIssuesCount] = useState(0);
 
-  useEffect(() => {
+useEffect(() => {
     const stored = localStorage.getItem('user');
     if (stored) {
       try { setUser(JSON.parse(stored)); }
@@ -32,6 +34,15 @@ export default function App() {
     }
     setLoading(false);
   }, []);
+
+useEffect(() => {
+  if (user?.role === 'admin') {
+    getOpenIssuesCount()
+      .then(res => setOpenIssuesCount(res.data.open_issues))
+      .catch(() => {});
+  }
+}, [user, refreshKey]);
+
 
   function navigate(target: string, fieldId?: string) {
     setPage(target as Page);
@@ -60,7 +71,7 @@ export default function App() {
   if (!user) return <LoginPage onLoginSuccess={handleLoginSuccess} />;
 
   const isAdmin    = user.role === 'admin';
-  const sharedProps = { onNavigate: navigate, onLogout: handleLogout, user };
+  const sharedProps = { onNavigate: navigate, onLogout: handleLogout, user, openIssuesCount };
 
   function renderPage() {
     if (page === 'field-detail' && selectedFieldId) {
@@ -84,6 +95,7 @@ if (page === 'notifications') {
           case 'analytics': return <AnalyticsPage key={refreshKey} {...sharedProps} />;
           case 'reports':   return <ReportsPage   key={refreshKey} {...sharedProps} />;
           case 'settings':  return <SettingsPage  key={refreshKey} {...sharedProps} />;
+          case 'issues':    return <IssuesPage    key={refreshKey} {...sharedProps} />;
           default:          return <AdminDashboard key={refreshKey} {...sharedProps} />;
         }
       

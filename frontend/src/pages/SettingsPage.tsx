@@ -9,11 +9,12 @@ interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
   user: any;
+  openIssuesCount: number;
 }
 
 type Tab = 'profile' | 'preferences';
 
-export function SettingsPage({ onNavigate, onLogout, user }: Props) {
+export function SettingsPage({ onNavigate, onLogout, user, openIssuesCount }: Props) {
   const isAdmin = user?.role === 'admin';
   const Shell = isAdmin ? AdminShell : AgentShell;
   const [tab, setTab]           = useState<Tab>('profile');
@@ -75,7 +76,7 @@ export function SettingsPage({ onNavigate, onLogout, user }: Props) {
   };
 
   return (
-    <Shell activePage="settings" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+    <Shell activePage="settings" onNavigate={onNavigate} onLogout={onLogout} user={user} openIssuesCount={openIssuesCount}>
 
       {saved && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#e8f5ee', color: '#1d6b35', fontSize: 12, fontWeight: 500, padding: '6px 14px', borderRadius: 8, marginBottom: 10, alignSelf: 'flex-start' }}>

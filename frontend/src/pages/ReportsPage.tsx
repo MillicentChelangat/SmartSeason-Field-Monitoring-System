@@ -10,6 +10,7 @@ interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
   user: any;
+  openIssuesCount: number;
 }
 
 type Tab = 'fields' | 'agents';
@@ -39,7 +40,7 @@ function downloadCSV(filename: string, rows: string[][], headers: string[]) {
   URL.revokeObjectURL(url);
 }
 
-export function ReportsPage({ onNavigate, onLogout, user }: Props) {
+export function ReportsPage({ onNavigate, onLogout, user, openIssuesCount }: Props) {
   const [fields, setFields]     = useState<any[]>([]);
   const [updates, setUpdates]   = useState<any[]>([]);
   const [agents, setAgents]     = useState<any[]>([]);
@@ -175,7 +176,7 @@ export function ReportsPage({ onNavigate, onLogout, user }: Props) {
         .report-card-value { color: #111; font-weight: 500; font-size: 12.5px; }
       `}</style>
 
-      <AdminShell activePage="reports" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+      <AdminShell activePage="reports" onNavigate={onNavigate} onLogout={onLogout} user={user} openIssuesCount={openIssuesCount}>
 
         {/* Tabs + Export */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 14 }}>

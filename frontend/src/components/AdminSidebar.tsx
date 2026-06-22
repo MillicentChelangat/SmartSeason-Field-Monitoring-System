@@ -1,6 +1,6 @@
 import {
   Leaf, LayoutDashboard, MapPin, Users, BarChart2,
-  FileText, Settings, LogOut, X, Bell,
+  FileText, Settings, LogOut, X, Bell, AlertTriangle,
 } from 'lucide-react';
 
 interface Props {
@@ -10,6 +10,7 @@ interface Props {
   user: any;
   fieldCount?: number;
   agentCount?: number;
+  openIssuesCount?: number;
   onClose?: () => void;
   collapsed?: boolean;
 }
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { id: 'dashboard',     label: 'Dashboard',     icon: LayoutDashboard, section: 'menu' },
   { id: 'fields',        label: 'Fields',         icon: MapPin,          section: 'menu' },
   { id: 'agents',        label: 'Agents',         icon: Users,           section: 'menu' },
+  { id: 'issues',        label: 'Issues',         icon: AlertTriangle,   section: 'menu' },
   { id: 'analytics',     label: 'Analytics',      icon: BarChart2,       section: 'reports' },
   { id: 'reports',       label: 'Reports',        icon: FileText,        section: 'reports' },
   { id: 'settings',      label: 'Settings',       icon: Settings,        section: 'system' },
@@ -28,7 +30,7 @@ function initials(name: string) {
   return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'A';
 }
 
-export function AdminSidebar({ activePage, onNavigate, onLogout, user, fieldCount, agentCount, onClose, collapsed }: Props) {
+export function AdminSidebar({ activePage, onNavigate, onLogout, user, fieldCount, agentCount, openIssuesCount, onClose, collapsed }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#ffffff', overflow: 'hidden', fontFamily: "'DM Sans', sans-serif" }}>
 
@@ -67,7 +69,7 @@ export function AdminSidebar({ activePage, onNavigate, onLogout, user, fieldCoun
       <nav style={{ flex: 1, overflowY: 'hidden', padding: '8px', minHeight: 0 }}>
         {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
           const isActive = activePage === id;
-          const badge = id === 'fields' ? fieldCount : id === 'agents' ? agentCount : undefined;
+          const badge = id === 'fields' ? fieldCount : id === 'agents' ? agentCount : id === 'issues' ? openIssuesCount : undefined;
           return (
             <button key={id}
               onClick={() => { onNavigate(id); onClose?.(); }}

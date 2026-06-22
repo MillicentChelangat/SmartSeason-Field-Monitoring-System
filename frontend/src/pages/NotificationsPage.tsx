@@ -9,6 +9,7 @@ interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
   user: any;
+  openIssuesCount: number;
 }
 
 interface Notification {
@@ -113,7 +114,7 @@ function buildNotifications(fields: any[], updates: any[], agents: any[], isAdmi
 
 type Filter = 'all' | 'unread' | 'at_risk' | 'field_update' | 'harvest_ready';
 
-export function NotificationsPage({ onNavigate, onLogout, user }: Props) {
+export function NotificationsPage({ onNavigate, onLogout, user, openIssuesCount }: Props) {
   const isAdmin = user?.role === 'admin';
   const Shell   = isAdmin ? AdminShell : AgentShell;
 
@@ -182,7 +183,7 @@ export function NotificationsPage({ onNavigate, onLogout, user }: Props) {
   ];
 
   return (
-    <Shell activePage="notifications" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+    <Shell activePage="notifications" onNavigate={onNavigate} onLogout={onLogout} user={user} openIssuesCount={openIssuesCount}>
 
       {/* Filter bar + actions */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>

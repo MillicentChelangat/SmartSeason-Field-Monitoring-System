@@ -15,6 +15,7 @@ interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
   user: any;
+  openIssuesCount: number;
 }
 
 const CROP_TYPES = ['Maize', 'Wheat', 'Rice', 'Sorghum', 'Millet', 'Soybean', 'Cotton', 'Sunflower', 'Barley', 'Other'];
@@ -26,7 +27,7 @@ const STAGE_COLORS: Record<string, { bg: string; color: string }> = {
   harvested: { bg: '#f1f5f9', color: '#475569' },
 };
 
-export function FieldsPage({ onNavigate, onLogout, user }: Props) {
+export function FieldsPage({ onNavigate, onLogout, user, openIssuesCount }: Props) {
   const [fields, setFields]               = useState<FieldWithExtras[]>([]);
   const [agents, setAgents]               = useState<Profile[]>([]);
   const [loading, setLoading]             = useState(true);
@@ -117,7 +118,7 @@ status: f.status,      }));
   }
 
   return (
-    <AdminShell activePage="fields" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+    <AdminShell activePage="fields" onNavigate={onNavigate} onLogout={onLogout} user={user} openIssuesCount={openIssuesCount}>
 
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',

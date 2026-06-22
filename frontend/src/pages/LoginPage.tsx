@@ -121,22 +121,22 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
               </span>
               <span className="text-white text-xs font-medium">Live field monitoring</span>
             </div>
-
+           <div className="text-center">
             <h2 className="text-4xl font-bold text-white leading-tight mb-4">
               Grow smarter with<br />
               <span className="text-green-300">SmartSeason</span>
             </h2>
 
-            <p className="text-white/70 text-sm leading-relaxed max-w-sm">
-              Monitor your fields, track crop stages, and coordinate agents —
+            <p className="text-white/70 text-lg font-normal leading-relaxed mb-4">
+              Monitor your fields, track crop stages, and coordinate agents
               all from one intelligent dashboard.
             </p>
-          </div>
+           </div>
 
-          {/* Bottom: footer note */}
-          <p className="text-white/30 text-xs text-center">
+           {/* Bottom: footer note */}
+           <p className="text-white/30 text-xs text-center">
             © {new Date().getFullYear()} SmartSeason. All rights reserved.
-          </p>
+           </p>
 
         </div>
       </div>

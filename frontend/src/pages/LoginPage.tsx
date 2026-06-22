@@ -132,7 +132,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
               all from one intelligent dashboard.
             </p>
            </div>
-
+            </div>
            {/* Bottom: footer note */}
            <p className="text-white/30 text-xs text-center">
             © {new Date().getFullYear()} SmartSeason. All rights reserved.
@@ -315,7 +315,6 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       </div>
       {/* ── END RIGHT PANEL ── */}
 
-    </div>
     </div>
 
   );

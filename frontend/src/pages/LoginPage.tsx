@@ -316,5 +316,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       {/* ── END RIGHT PANEL ── */}
 
     </div>
+    </div>
+
   );
 }

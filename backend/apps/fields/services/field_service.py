@@ -1,5 +1,6 @@
-from apps.fields.models import Field, FieldUpdate, Profile
 from apps.fields.services.field_status import compute_field_status
+from apps.fields.models import Field, FieldUpdate, Profile, FieldIssue
+
 
 def get_all_fields():
     fields = Field.objects.prefetch_related('updates').all()
@@ -144,3 +145,56 @@ def get_dashboard_data(user):
         fields = list(Field.objects.filter(assigned_agent=user).values())
 
     return {'role': role, 'fields': fields}
+
+
+def report_issue(field_id, reported_by_id, issue_type, severity, description=''):
+    field = Field.objects.get(id=field_id)
+    issue = FieldIssue.objects.create(
+        field=field,
+        reported_by_id=reported_by_id,
+        issue_type=issue_type,
+        severity=severity,
+        description=description,
+    )
+    # Auto-update field status if severity is high
+    if severity == 'high':
+        field.current_stage = field.current_stage  # keep stage
+        field.save()
+    return issue
+
+
+def get_issues_for_field(field_id):
+    issues = FieldIssue.objects.filter(field_id=field_id).order_by('-created_at')
+    return [_serialize_issue(i) for i in issues]
+
+
+def get_all_issues():
+    issues = FieldIssue.objects.all().order_by('-created_at').select_related('field', 'reported_by')
+    return [_serialize_issue(i) for i in issues]
+
+
+def update_issue_status(issue_id, status):
+    issue = FieldIssue.objects.get(id=issue_id)
+    issue.status = status
+    issue.save()
+    return issue
+
+
+def get_open_issues_count():
+    return FieldIssue.objects.exclude(status='resolved').count()
+
+
+def _serialize_issue(issue):
+    return {
+        'id': issue.id,
+        'field_id': issue.field_id,
+        'field_name': issue.field.name,
+        'reported_by_id': issue.reported_by_id,
+        'reported_by_name': issue.reported_by.get_full_name() or issue.reported_by.username if issue.reported_by else 'Unknown',
+        'issue_type': issue.issue_type,
+        'severity': issue.severity,
+        'description': issue.description,
+        'status': issue.status,
+        'created_at': str(issue.created_at),
+        'updated_at': str(issue.updated_at),
+    }

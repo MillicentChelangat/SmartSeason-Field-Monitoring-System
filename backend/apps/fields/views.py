@@ -224,6 +224,28 @@ def add_field_update(request, id):
         return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'message': 'Update saved', 'update': {'id': update.id}}, status=201)
 
+@csrf_exempt
+@require_http_methods(["PATCH"])
+def update_field(request, id):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        id = int(id)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid ID'}, status=400)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    try:
+        field = field_service.update_field(id, data)
+    except Exception as e:
+        if 'not found' in str(e).lower():
+            return JsonResponse({'error': 'Field not found'}, status=404)
+        return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'message': 'Field updated', 'field': {'id': field.id, 'name': field.name}})    
+
 
 # ── Agents ────────────────────────────────────────────────────────────────────
 
@@ -248,9 +270,12 @@ def get_field_agents(request, id):
         return JsonResponse({'error': 'Invalid ID'}, status=400)
     return JsonResponse(list(field_service.get_agents_for_field(id)), safe=False)
 
+
+# ── Issues ────────────────────────────────────────────────────────────────────
+
 @csrf_exempt
-@require_http_methods(["PATCH"])
-def update_field(request, id):
+@require_GET
+def get_field_issues(request, id):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
@@ -258,14 +283,63 @@ def update_field(request, id):
         id = int(id)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid ID'}, status=400)
+    return JsonResponse(field_service.get_issues_for_field(id), safe=False)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def report_field_issue(request, id):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
     try:
         data = json.loads(request.body)
     except Exception:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     try:
-        field = field_service.update_field(id, data)
+        issue = field_service.report_issue(
+            field_id=id,
+            reported_by_id=user_id,
+            issue_type=data.get('issue_type'),
+            severity=data.get('severity', 'low'),
+            description=data.get('description', ''),
+        )
     except Exception as e:
-        if 'not found' in str(e).lower():
-            return JsonResponse({'error': 'Field not found'}, status=404)
         return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'message': 'Field updated', 'field': {'id': field.id, 'name': field.name}})
+    return JsonResponse({'message': 'Issue reported', 'issue': {'id': issue.id}}, status=201)
+
+
+@csrf_exempt
+@require_GET
+def get_all_issues(request):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    return JsonResponse(field_service.get_all_issues(), safe=False)
+
+
+@csrf_exempt
+@require_GET
+def get_issues_count(request):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    count = field_service.get_open_issues_count()
+    return JsonResponse({'open_issues': count})
+
+
+@csrf_exempt
+@require_http_methods(["PATCH"])
+def update_issue_status(request, id):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    try:
+        issue = field_service.update_issue_status(id, data.get('status'))
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'message': 'Issue status updated', 'issue': {'id': issue.id, 'status': issue.status}})

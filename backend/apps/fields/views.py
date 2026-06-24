@@ -54,6 +54,8 @@ def login_api(request):
             'email': user.username,
             'full_name': profile.full_name if profile else '',
             'role': profile.role if profile else 'field_agent',
+            'phone': profile.phone if profile else '',
+            'residence': profile.residence if profile else '',
         }
     })
 

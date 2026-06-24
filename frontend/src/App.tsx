@@ -13,10 +13,11 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { IssuesPage } from './pages/IssuesPage';
 import { getOpenIssuesCount } from './api/api'
+import { ProfilePage } from './pages/ProfilePage';
 
 type Page =
   | 'dashboard' | 'fields' | 'my-fields' | 'agents'
-  | 'field-detail' | 'analytics' | 'reports' | 'settings' | 'notifications' | 'issues';
+  | 'field-detail' | 'analytics' | 'reports' | 'settings' | 'notifications' | 'issues' | 'profile';
 
 export default function App() {
   const [user, setUser]                       = useState<any>(null);
@@ -105,7 +106,9 @@ if (page === 'notifications') {
       case 'my-fields': return <MyFieldsPage key={refreshKey} {...sharedProps} />;
       case 'analytics': return <AnalyticsPage key={refreshKey} {...sharedProps} />;
       case 'settings':  return <SettingsPage key={refreshKey} {...sharedProps} />;
+      case 'profile':   return <ProfilePage key={refreshKey} {...sharedProps} />;
       default:          return <AgentDashboard key={refreshKey} {...sharedProps} />;
+      
     }
   }
 

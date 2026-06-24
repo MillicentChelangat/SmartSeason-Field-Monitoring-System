@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Shield, Save, Eye, EyeOff } from 'lucide-react';
 import API from '../api/api';
 import { AgentShell } from '../components/AgentShell';
@@ -13,15 +13,27 @@ export function ProfilePage({ onNavigate, onLogout, user }: Props) {
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
   const [showPass, setShowPass] = useState(false);
-
   const [profile, setProfile] = useState({
     full_name: user?.full_name || '',
     email: user?.email || '',
     phone: user?.phone || '',
-    residence: (user?.residence && user.residence !== user?.email) ? user.residence : '',
+    residence: '',
     current_password: '',
     new_password: '',
   });
+
+useEffect(() => {
+  API.get('profile/')
+    .then(res => setProfile({
+      full_name: res.data.full_name,
+      email: res.data.email,
+      phone: res.data.phone || '',
+      residence: res.data.residence || '',
+      current_password: '',
+      new_password: '',
+    }))
+    .catch(err => console.error(err));
+}, []);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();

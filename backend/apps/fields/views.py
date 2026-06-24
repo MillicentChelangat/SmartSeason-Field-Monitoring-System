@@ -101,6 +101,59 @@ def get_fields(request):
     return JsonResponse(list(field_service.get_all_fields()), safe=False)
 
 
+# ── Profile ────────────────────────────────────────────────────────────────────
+
+@csrf_exempt
+@require_GET
+def get_profile(request):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        from django.contrib.auth.models import User
+        u = User.objects.get(id=user_id)
+        profile = Profile.objects.get(user=u)
+        return JsonResponse({
+            'full_name': profile.full_name,
+            'email': u.username,
+            'phone': profile.phone,
+            'residence': profile.residence,
+            'role': profile.role,
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["PATCH"])
+def update_profile(request):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    try:
+        from django.contrib.auth.models import User
+        u = User.objects.get(id=user_id)
+        profile = Profile.objects.get(user=u)
+        if 'full_name' in data:
+            profile.full_name = data['full_name']
+        if 'phone' in data:
+            profile.phone = data['phone']
+        if 'residence' in data:
+            profile.residence = data['residence']
+        profile.save()
+        if data.get('new_password'):
+            if not u.check_password(data.get('current_password', '')):
+                return JsonResponse({'error': 'Current password is incorrect'}, status=400)
+            u.set_password(data['new_password'])
+            u.save()
+        return JsonResponse({'message': 'Profile updated'})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
 @csrf_exempt
 @require_GET
 def get_field_detail(request, id):

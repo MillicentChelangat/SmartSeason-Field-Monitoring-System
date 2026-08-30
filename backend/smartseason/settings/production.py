@@ -2,8 +2,7 @@ from .base import *
 import os
 import dj_database_url
 
-DEBUG = False
-#DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'smartseason-field-monitoring-system-1-bm87.onrender.com',
@@ -20,4 +19,3 @@ CORS_ALLOWED_ORIGINS = [
     'https://smart-season-field-monitoring-syste-liard.vercel.app',
 ]
 
-SECRET_KEY = os.environ.get('SECRET_KEY', '')

@@ -1,20 +1,14 @@
-# Frontend specific
-frontend/.bolt/
-frontend/deriv-bot.xml
-frontend/node_modules/
 
-# Python
+.env
 __pycache__/
 *.pyc
-
-# Django database
+venv/
+node_modules/
 db.sqlite3
-
+media/
+dist/
+.vscode/
+.DS_Store
 # Build outputs
 dist/
 build/
-
-venv/
-__pycache__/
-db.sqlite3
-*.pyc

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MapPin, Search, ChevronRight, Calendar, Layers } from 'lucide-react';
+import { MapPin, Search, ChevronRight } from 'lucide-react';
 import API from '../api/api';
 import type { Field, FieldUpdate } from '../types/database';
 import { StatusBadge } from '../components/StatusBadge';
@@ -15,23 +15,6 @@ interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
   user: any;
-}
-
-const STAGE_COLORS: Record<string, { bg: string; color: string }> = {
-  planted:   { bg: '#e0f0fe', color: '#0369a1' },
-  growing:   { bg: '#d1fae5', color: '#065f46' },
-  ready:     { bg: '#fef3c7', color: '#92400e' },
-  harvested: { bg: '#f1f5f9', color: '#475569' },
-};
-
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  const hrs  = Math.floor(mins / 60);
-  const days = Math.floor(hrs / 24);
-  if (days > 0) return `${days}d ago`;
-  if (hrs > 0)  return `${hrs}h ago`;
-  return `${mins}m ago`;
 }
 
 export function MyFieldsPage({ onNavigate, onLogout, user }: Props) {
@@ -132,7 +115,7 @@ export function MyFieldsPage({ onNavigate, onLogout, user }: Props) {
           </div>
         </div>
 
-        {/* Fields grid */}
+        {/* Fields table */}
         {fields.length === 0 ? (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: 12, color: '#aaa' }}>
             <MapPin size={36} style={{ opacity: 0.2, marginBottom: 8 }} />
@@ -143,66 +126,49 @@ export function MyFieldsPage({ onNavigate, onLogout, user }: Props) {
             No fields match your search.
           </div>
         ) : (
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
-              {filtered.map(field => {
-                const stageStyle = STAGE_COLORS[field.current_stage] ?? { bg: '#f1f5f9', color: '#475569' };
-                const daysSince  = Math.floor((Date.now() - new Date(field.planting_date).getTime()) / (1000 * 60 * 60 * 24));
-                return (
-                  <button
-                    key={field.id}
-                    onClick={() => onNavigate('field-detail', String(field.id))}
-                    style={{ background: '#fff', borderRadius: 12, padding: 16, textAlign: 'left', border: '0.5px solid #e8eae4', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'box-shadow 0.15s' }}
-                    onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.07)')}
-                    onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
-                  >
-                    {/* Card top */}
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 9, background: stageStyle.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <MapPin size={16} color={stageStyle.color} />
-                      </div>
-                      <StatusBadge status={field.status} />
-                    </div>
-
-                    {/* Name */}
-                    <p style={{ fontSize: 13.5, fontWeight: 600, color: '#111', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{field.name}</p>
-                    {field.location && <p style={{ fontSize: 11, color: '#aaa', marginBottom: 10 }}>{field.location}</p>}
-
-                    {/* Details */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: '#888' }}>
-                          <Layers size={11} color="#1d6b35" /> Crop
+          <div style={{ flex: 1, overflowY: 'auto', background: '#fff', borderRadius: 12, border: '0.5px solid #e8eae4' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: "'DM Sans', sans-serif" }}>
+              <thead>
+                <tr style={{ borderBottom: '0.5px solid #f0f2ee' }}>
+                  <th style={{ textAlign: 'left', padding: '10px 16px', fontSize: 11, fontWeight: 600, color: '#888' }}>Field</th>
+                  <th style={{ textAlign: 'left', padding: '10px 16px', fontSize: 11, fontWeight: 600, color: '#888' }}>Crop</th>
+                  <th style={{ textAlign: 'left', padding: '10px 16px', fontSize: 11, fontWeight: 600, color: '#888' }}>Stage</th>
+                  <th style={{ textAlign: 'left', padding: '10px 16px', fontSize: 11, fontWeight: 600, color: '#888' }}>Days</th>
+                  <th style={{ textAlign: 'left', padding: '10px 16px', fontSize: 11, fontWeight: 600, color: '#888' }}>Status</th>
+                  <th style={{ textAlign: 'left', padding: '10px 16px', fontSize: 11, fontWeight: 600, color: '#888' }}>Joined</th>
+                  <th style={{ padding: '10px 16px' }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(field => {
+                  const daysSince = Math.floor((Date.now() - new Date(field.planting_date).getTime()) / (1000 * 60 * 60 * 24));
+                  return (
+                    <tr
+                      key={field.id}
+                      onClick={() => onNavigate('field-detail', String(field.id))}
+                      style={{ borderBottom: '0.5px solid #f0f2ee', cursor: 'pointer', transition: 'background 0.15s' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#fafbf9')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <td style={{ padding: '12px 16px' }}>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{field.name}</p>
+                        {field.location && <p style={{ fontSize: 11, color: '#aaa', marginTop: 1 }}>{field.location}</p>}
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: 12, color: '#333' }}>{field.crop_type}</td>
+                      <td style={{ padding: '12px 16px' }}><StageBadge stage={field.current_stage} /></td>
+                      <td style={{ padding: '12px 16px', fontSize: 12, color: '#333' }}>{daysSince}d</td>
+                      <td style={{ padding: '12px 16px' }}><StatusBadge status={field.status} /></td>
+                      <td style={{ padding: '12px 16px', fontSize: 11.5, color: '#aaa' }}>{new Date(field.created_at).toLocaleDateString()}</td>
+                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11.5, color: '#1d6b35', fontWeight: 500 }}>
+                          View <ChevronRight size={12} />
                         </span>
-                        <span style={{ fontSize: 12, fontWeight: 500, color: '#333' }}>{field.crop_type}</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: '#888' }}>
-                          <MapPin size={11} color="#1d6b35" /> Stage
-                        </span>
-                        <StageBadge stage={field.current_stage} />
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: '#888' }}>
-                          <Calendar size={11} color="#1d6b35" /> Days
-                        </span>
-                        <span style={{ fontSize: 12, fontWeight: 500, color: '#333' }}>{daysSince}d since planting</span>
-                      </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div style={{ paddingTop: 10, borderTop: '0.5px solid #f0f2ee', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <p style={{ fontSize: 10.5, color: '#aaa' }}>
-                        {field.lastUpdate ? `Updated ${timeAgo(field.lastUpdate.created_at)}` : 'No updates yet'}
-                      </p>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11.5, color: '#1d6b35', fontWeight: 500 }}>
-                        View <ChevronRight size={12} />
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

@@ -138,7 +138,17 @@ export function AgentsPage({ onNavigate, onLogout, user, openIssuesCount }: Prop
               <p style={{ fontSize: 13 }}>No agents found</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+
+
+            <table>
+              <thead><tr>
+                <th>name</th>
+                <th>email</th>
+                <th></th>
+                
+                </tr></thead>
+            </table>
+            // <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
               {filtered.map((agent, idx) => {
                 const col = AVATAR_COLORS[idx % AVATAR_COLORS.length];
                 const isSelected = selected?.id === agent.id;

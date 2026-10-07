@@ -2,7 +2,7 @@ from .base import *
 import os
 import dj_database_url
 
-DEBUG = True
+DEBUG = False
 #DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
@@ -22,4 +22,3 @@ CORS_ALLOWED_ORIGINS = [
    "http://127.0.0.1:5173",
 ]
 
-SECRET_KEY = os.environ.get('SECRET_KEY', '')

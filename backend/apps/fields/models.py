@@ -9,7 +9,7 @@ class Profile(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=100, default='')
+    full_name = models.CharField(max_length=100, default='') 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='field_agent')
     phone = models.CharField(max_length=20, blank=True, default='')
     residence = models.CharField(max_length=200, blank=True, default='')

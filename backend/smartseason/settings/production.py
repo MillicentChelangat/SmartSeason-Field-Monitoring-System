@@ -2,10 +2,11 @@ from .base import *
 import os
 import dj_database_url
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = False
+#DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
-    'smartseason-field-monitoring-system-1-bm87.onrender.com',
+    #'smartseason-field-monitoring-system-1-bm87.onrender.com',
 ]
 
 DATABASES = {
@@ -16,6 +17,8 @@ DATABASES = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    'https://smart-season-field-monitoring-syste-liard.vercel.app',
+  #  'https://smart-season-field-monitoring-syste-liard.vercel.app',
+   "http://localhost:5173",
+   "http://127.0.0.1:5173",
 ]
 

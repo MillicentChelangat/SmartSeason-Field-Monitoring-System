@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Leaf, MapPin, Users, AlertTriangle,
-  CheckCircle2, Activity, TrendingUp, Download,
-  Plus, Bell, ChevronRight,
-} from 'lucide-react';
+import { Leaf, MapPin, Users, AlertTriangle, CheckCircle2, Activity, TrendingUp, Download, Plus, Bell, ChevronRight,} from 'lucide-react';
 import API from '../api/api.ts';
 import type { Field, FieldUpdate, Profile } from '../types/database';
 import { StatusBadge } from '../components/StatusBadge';
@@ -23,6 +19,7 @@ interface Props {
   onNavigate: (page: string, fieldId?: string) => void;
   onLogout: () => void;
   user: any;
+  openIssuesCount: number;
 }
 
 const STAGE_COLORS: Record<string, string> = {
@@ -59,7 +56,7 @@ function timeAgo(dateStr: string) {
   return 'just now';
 }
 
-export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
+export function AdminDashboard({ onNavigate, onLogout, user, openIssuesCount }: Props) {
   const [fields, setFields]               = useState<FieldWithStatus[]>([]);
   const [recentUpdates, setRecentUpdates] = useState<EnrichedUpdate[]>([]);
   const [agentList, setAgentList]         = useState<Profile[]>([]);
@@ -110,7 +107,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
 
   if (loading) {
     return (
-      <AdminShell activePage="dashboard" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+      <AdminShell activePage="dashboard" onNavigate={onNavigate} onLogout={onLogout} user={user} openIssuesCount={openIssuesCount}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#f0f4f0' }}>
           <LoadingSpinner size="lg" />
         </div>
@@ -136,7 +133,7 @@ export function AdminDashboard({ onNavigate, onLogout, user }: Props) {
   ];
 
   return (
-    <AdminShell activePage="dashboard" onNavigate={onNavigate} onLogout={onLogout} user={user}>
+    <AdminShell activePage="dashboard" onNavigate={onNavigate} onLogout={onLogout} user={user} openIssuesCount={openIssuesCount}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '24px 24px 40px' }}>
 
         {/* ACTION BAR */}

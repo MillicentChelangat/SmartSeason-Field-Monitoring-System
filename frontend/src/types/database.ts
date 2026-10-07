@@ -16,11 +16,12 @@ export interface Field {
   crop_type: string;
   planting_date: string;
   current_stage: FieldStage;
+  status: FieldStatus;
   location: string;
   assigned_agent_id: number | null; 
   created_at: string;
   updated_at?: string;
-  status: FieldStatus;
+  
 }
 
 export interface FieldUpdate {

@@ -14,6 +14,7 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { IssuesPage } from './pages/IssuesPage';
 import { getOpenIssuesCount } from './api/api'
 import { ProfilePage } from './pages/ProfilePage';
+import { AssistantChat } from './components/AssistantChat';
 
 type Page =
   | 'dashboard' | 'fields' | 'my-fields' | 'agents'
@@ -78,6 +79,7 @@ useEffect(() => {
     if (page === 'field-detail' && selectedFieldId) {
       return (
         <FieldDetailPage
+          key={refreshKey}
           fieldId={selectedFieldId}
           onBack={() => navigate(isAdmin ? 'fields' : 'my-fields')}
           {...sharedProps}
@@ -112,5 +114,10 @@ if (page === 'notifications') {
     }
   }
 
-  return <>{renderPage()}</>;
+  return (
+    <>
+      {renderPage()}
+      <AssistantChat user={user} onDataChanged={() => setRefreshKey(prev => prev + 1)} />
+    </>
+  );
 }

@@ -1,8 +1,9 @@
 export const statusLabels: Record<string, string> = {
   healthy:  'Healthy',
+  monitor:  'Monitor',
   at_risk:  'At Risk',
   critical: 'Critical',
-  monitor:  'Monitor',
+  
 };
 
 export const stageLabels: Record<string, string> = {

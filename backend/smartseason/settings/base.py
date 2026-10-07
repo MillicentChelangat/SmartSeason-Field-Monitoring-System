@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -13,6 +14,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'apps.fields',
     'apps.agent',
+    'apps.assistant',
     'apps.common',
 ]
 

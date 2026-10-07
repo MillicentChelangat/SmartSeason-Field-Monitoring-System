@@ -14,8 +14,8 @@ API.interceptors.request.use(config => {
 
 export default API
 
-// ── Issues ────────────────────────────────────────────────────────────────────
-
+ //Issues 
+ 
 export const reportIssue = (fieldId: number, data: {
   issue_type: string
   severity: string

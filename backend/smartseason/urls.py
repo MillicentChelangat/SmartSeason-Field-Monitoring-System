@@ -6,6 +6,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('apps.fields.urls')),
     path('api/agent/', include('apps.agent.urls')),
+    path('api/assistant/', include('apps.assistant.urls')),
     path('api/token/', TokenObtainPairView.as_view()),
     path('api/token/refresh/', TokenRefreshView.as_view()),
 ]

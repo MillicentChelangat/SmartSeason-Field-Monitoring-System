@@ -21,16 +21,16 @@ export function Navbar({ user, currentPage, onNavigate, onLogout }: NavbarProps)
   { id: 'analytics', label: 'Analytics', icon: BarChart2,        section: 'reports' },
   { id: 'reports',   label: 'Reports',   icon: FileText,         section: 'reports' },
   { id: 'settings',  label: 'Settings',  icon: Settings,         section: 'system' },
-  { id: 'help',      label: 'Help',      icon: HelpCircle,       section: 'system' },
+  // { id: 'help',      label: 'Help',      icon: HelpCircle,       section: 'system' },
   ];
 
   const agentLinks = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, section: 'menu' },
   { id: 'my fields', label: 'My Fields', icon: MapPin,          section: 'menu' },
   { id: 'analytics', label: 'Analytics', icon: BarChart2,        section: 'reports' },
-  { id: 'reports',   label: 'Reports',   icon: FileText,         section: 'reports' },
+  // { id: 'reports',   label: 'Reports',   icon: FileText,         section: 'reports' },
   { id: 'settings',  label: 'Settings',  icon: Settings,         section: 'system' },
-  { id: 'help',      label: 'Help',      icon: HelpCircle,       section: 'system' },
+  // { id: 'help',      label: 'Help',      icon: HelpCircle,       section: 'system' },
   ];
 
   const links = isAdmin ? adminLinks : agentLinks;

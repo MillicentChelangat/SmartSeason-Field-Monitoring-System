@@ -158,7 +158,7 @@ def report_issue(field_id, reported_by_id, issue_type, severity, description='')
     )
     # Auto-update field status if severity is high
     if severity == 'high':
-        field.current_stage = field.current_stage  # keep stage
+        field.current_stage = field.current_stage  
         field.save()
     return issue
 

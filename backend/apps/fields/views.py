@@ -5,6 +5,7 @@ from apps.fields.services import auth_service, field_service
 from django.views.decorators.http import require_GET, require_http_methods
 from apps.agent.services.agent_service import get_user_id_from_token
 from apps.fields.models import Field, Profile
+from apps.common.access import get_role, is_admin, can_access_field, forbidden
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -63,6 +64,11 @@ def login_api(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def register_agent(request):
+    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
+    if not user_id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    if not is_admin(user_id):
+        return forbidden()
     try:
         data = json.loads(request.body)
     except Exception:
@@ -86,7 +92,11 @@ def dashboard(request):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
-    data = field_service.get_dashboard_data(user_id)
+    from django.contrib.auth.models import User
+    user = User.objects.filter(id=user_id).first()
+    if not user:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    data = field_service.get_dashboard_data(user)
     return JsonResponse(data)
 
 
@@ -98,7 +108,10 @@ def get_fields(request):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
-    return JsonResponse(list(field_service.get_all_fields()), safe=False)
+    fields = list(field_service.get_all_fields())
+    if not is_admin(user_id):
+        fields = [f for f in fields if f['assigned_agent_id'] == user_id]
+    return JsonResponse(fields, safe=False)
 
 
 # ── Profile ────────────────────────────────────────────────────────────────────
@@ -164,6 +177,8 @@ def get_field_detail(request, id):
         id = int(id)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid ID'}, status=400)
+    if not can_access_field(user_id, id):
+        return forbidden()
     field = field_service.get_field_by_id(id)
     if not field:
         return JsonResponse({'error': 'Field not found'}, status=404)
@@ -176,6 +191,8 @@ def create_field(request):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
+    if not is_admin(user_id):
+        return forbidden()
     try:
         data = json.loads(request.body)
     except Exception:
@@ -200,6 +217,8 @@ def assign_field(request, id):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
+    if not is_admin(user_id):
+        return forbidden()
     try:
         id = int(id)
     except (ValueError, TypeError):
@@ -222,6 +241,8 @@ def delete_field(request, id):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
+    if not is_admin(user_id):
+        return forbidden()
     try:
         field_service.delete_field(id)
     except Exception:
@@ -237,7 +258,11 @@ def get_field_updates(request):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
-    return JsonResponse(list(field_service.get_all_field_updates()), safe=False)
+    updates = list(field_service.get_all_field_updates())
+    if not is_admin(user_id):
+        mine = set(Field.objects.filter(assigned_agent_id=user_id).values_list('id', flat=True))
+        updates = [u for u in updates if u['field_id'] in mine]
+    return JsonResponse(updates, safe=False)
    
 
 
@@ -251,6 +276,8 @@ def get_field_updates_by_id(request, id):
         id = int(id)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid ID'}, status=400)
+    if not can_access_field(user_id, id):
+        return forbidden()
     return JsonResponse(list(field_service.get_updates_for_field(id)), safe=False)
 
 
@@ -264,6 +291,8 @@ def add_field_update(request, id):
         id = int(id)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid ID'}, status=400)
+    if not can_access_field(user_id, id):
+        return forbidden()
     try:
         data = json.loads(request.body)
     except Exception:
@@ -273,7 +302,7 @@ def add_field_update(request, id):
             field_id=id,
             stage=data.get('stage'),
             notes=data.get('notes', ''),
-            agent_id=data.get('agent_id'),
+            agent_id=data.get('agent_id') if is_admin(user_id) else user_id,
         )
     except ValueError as e:
         return JsonResponse({'error': str(e)}, status=400)
@@ -285,6 +314,8 @@ def update_field(request, id):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
+    if not is_admin(user_id):
+        return forbidden()
     try:
         id = int(id)
     except (ValueError, TypeError):
@@ -310,7 +341,10 @@ def get_agents(request):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
-    return JsonResponse(list(field_service.get_all_agents()), safe=False)
+    agents = list(field_service.get_all_agents())
+    if not is_admin(user_id):
+        agents = [a for a in agents if a['user_id'] == user_id]
+    return JsonResponse(agents, safe=False)
 
 
 @csrf_exempt
@@ -323,6 +357,8 @@ def get_field_agents(request, id):
         id = int(id)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid ID'}, status=400)
+    if not can_access_field(user_id, id):
+        return forbidden()
     return JsonResponse(list(field_service.get_agents_for_field(id)), safe=False)
 
 
@@ -338,6 +374,8 @@ def get_field_issues(request, id):
         id = int(id)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid ID'}, status=400)
+    if not can_access_field(user_id, id):
+        return forbidden()
     return JsonResponse(field_service.get_issues_for_field(id), safe=False)
 
 
@@ -347,6 +385,8 @@ def report_field_issue(request, id):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
+    if not can_access_field(user_id, id):
+        return forbidden()
     try:
         data = json.loads(request.body)
     except Exception:
@@ -370,6 +410,8 @@ def get_all_issues(request):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
+    if not is_admin(user_id):
+        return forbidden()
     return JsonResponse(field_service.get_all_issues(), safe=False)
 
 
@@ -379,6 +421,8 @@ def get_issues_count(request):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
+    if not is_admin(user_id):
+        return forbidden()
     count = field_service.get_open_issues_count()
     return JsonResponse({'open_issues': count})
 
@@ -389,6 +433,8 @@ def update_issue_status(request, id):
     user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
     if not user_id:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
+    if not is_admin(user_id):
+        return forbidden()
     try:
         data = json.loads(request.body)
     except Exception:

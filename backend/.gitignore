@@ -19,3 +19,30 @@ env/
 .idea/
 *.zip
 
+# Python
+__pycache__/
+*.pyc
+
+# Django database
+db.sqlite3
+
+# Build outputs
+dist/
+build/
+
+venv/
+__pycache__/
+db.sqlite3
+*.pyc# Frontend specific
+
+
+# Python
+__pycache__/
+*.pyc
+
+# Django database
+db.sqlite3
+
+# Build outputs
+dist/
+build/

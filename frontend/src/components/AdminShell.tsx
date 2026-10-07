@@ -15,9 +15,13 @@ interface Props {
 }
 
 const PAGE_TITLES: Record<string, string> = {
-  dashboard: 'Dashboard', fields: 'Fields', agents: 'Agents', issues: 'Issues',
-  analytics: 'Analytics', reports: 'Reports',
-  settings: 'Settings', help: 'Help & Support',
+  dashboard: 'Dashboard', 
+  fields: 'Fields', 
+  agents: 'Agents', 
+  issues: 'Issues',
+  analytics: 'Analytics',
+  reports: 'Reports',
+  settings: 'Settings', 
 };
 
 export function AdminShell({ children, activePage, onNavigate, onLogout, user, fieldCount, agentCount, openIssuesCount }: Props) {

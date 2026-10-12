@@ -43,7 +43,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Set `SECRET_KEY` and `DATABASE_URL` first, plus `GROQ_API_KEY` if you want the assistant (free key at console.groq.com). See `backend/.env.example`.
+Set `SECRET_KEY` and `DATABASE_URL` (a PostgreSQL URL) first, plus `GROQ_API_KEY` if you want the assistant (free key at console.groq.com).
 
 ```bash
 cd frontend

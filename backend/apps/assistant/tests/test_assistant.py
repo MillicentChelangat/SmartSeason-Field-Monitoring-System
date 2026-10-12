@@ -9,7 +9,7 @@ from django.utils import timezone
 from rest_framework_simplejwt.tokens import AccessToken
 
 from apps.assistant import agent, tools
-from apps.assistant.llm import GeminiClient, LLMError, LLMResponse, ToolCall
+from apps.assistant.llm import GroqClient, LLMError, LLMResponse, ToolCall, get_llm
 from apps.fields.models import Field, FieldIssue, FieldUpdate, Profile
 
 
@@ -298,30 +298,51 @@ class EndpointTests(Base):
         self.assertEqual(FieldUpdate.objects.get().stage, 'ready')
 
 
-# ── Gemini translation layer (no network) ─────────────────────────────────────
+# ── Groq translation layer (no network) ───────────────────────────────────────
 
-class GeminiClientTests(TestCase):
-    def test_messages_are_converted_and_tool_results_merged(self):
-        raw = [{'functionCall': {'name': 'list_fields', 'args': {}}, 'thoughtSignature': 'sig'}]
-        contents = GeminiClient._to_contents([
+class GroqClientTests(TestCase):
+    def test_messages_are_converted_and_tool_results_matched_to_calls(self):
+        messages = GroqClient._to_messages('be helpful', [
             {'role': 'user', 'text': 'hi'},
-            {'role': 'assistant', 'text': '', 'raw': raw},
+            {'role': 'assistant', 'text': '', 'tool_calls': [
+                ToolCall('list_fields', {}), ToolCall('season_summary', {})]},
             {'role': 'tool', 'name': 'list_fields', 'result': {'count': 1}},
             {'role': 'tool', 'name': 'season_summary', 'result': {'total': 1}},
         ])
-        self.assertEqual([c['role'] for c in contents], ['user', 'model', 'user'])
-        self.assertEqual(contents[1]['parts'], raw)  # replayed untouched, signature included
-        self.assertEqual(len(contents[2]['parts']), 2)
-        self.assertEqual(contents[2]['parts'][0]['functionResponse']['response'], {'result': {'count': 1}})
+        self.assertEqual([m['role'] for m in messages],
+                         ['system', 'user', 'assistant', 'tool', 'tool'])
+        calls = messages[2]['tool_calls']
+        self.assertEqual([c['function']['name'] for c in calls], ['list_fields', 'season_summary'])
+        # each tool result must point at the id of the call it answers
+        self.assertEqual(messages[3]['tool_call_id'], calls[0]['id'])
+        self.assertEqual(messages[4]['tool_call_id'], calls[1]['id'])
+        self.assertEqual(json.loads(messages[3]['content']), {'count': 1})
 
-    def test_parses_text_and_function_calls(self):
-        r = GeminiClient._parse({'candidates': [{'content': {'parts': [
-            {'text': 'Checking.'}, {'functionCall': {'name': 'list_fields', 'args': {'stage': 'growing'}}}]}}]})
+    def test_parses_text_and_tool_calls(self):
+        r = GroqClient._parse({'choices': [{'message': {
+            'content': 'Checking.',
+            'tool_calls': [{'function': {'name': 'list_fields',
+                                         'arguments': '{"stage": "growing"}'}}],
+        }}]})
         self.assertEqual(r.text, 'Checking.')
-        self.assertEqual((r.tool_calls[0].name, r.tool_calls[0].args), ('list_fields', {'stage': 'growing'}))
+        self.assertEqual((r.tool_calls[0].name, r.tool_calls[0].args),
+                         ('list_fields', {'stage': 'growing'}))
 
-    def test_empty_or_blocked_response_raises_friendly_error(self):
+    def test_bad_tool_arguments_become_empty_args(self):
+        r = GroqClient._parse({'choices': [{'message': {
+            'content': '',
+            'tool_calls': [{'function': {'name': 'list_fields', 'arguments': 'not json'}}],
+        }}]})
+        self.assertEqual(r.tool_calls[0].args, {})
+
+    def test_empty_response_raises_friendly_error(self):
         with self.assertRaises(LLMError):
-            GeminiClient._parse({'candidates': []})
+            GroqClient._parse({'choices': []})
         with self.assertRaises(LLMError):
-            GeminiClient._parse({'candidates': [{'content': {'parts': []}}]})
+            GroqClient._parse({'choices': [{'message': {'content': ''}}]})
+
+    def test_get_llm_needs_an_api_key(self):
+        with patch.dict('os.environ', {}, clear=True):
+            self.assertIsNone(get_llm())
+        with patch.dict('os.environ', {'GROQ_API_KEY': 'test-key'}, clear=True):
+            self.assertIsInstance(get_llm(), GroqClient)

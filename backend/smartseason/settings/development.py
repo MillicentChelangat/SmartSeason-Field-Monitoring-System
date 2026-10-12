@@ -1,3 +1,6 @@
+import os
+import dj_database_url
+
 from .base import *
 
 DEBUG = True
@@ -16,8 +19,8 @@ DATABASES = {
     )
 }
 
-
 CORS_ALLOWED_ORIGINS = [
-    "https://your-frontend-url.vercel.app",
-    "http://localhost:5173",  
+    "https://smart-season-field-monitoring-syste-liard.vercel.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]

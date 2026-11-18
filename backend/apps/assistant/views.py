@@ -1,61 +1,50 @@
-import json
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-
-from apps.agent.services.agent_service import get_user_id_from_token
 from apps.assistant import agent
 from apps.assistant.llm import LLMError, get_llm
 
+
 MAX_MESSAGE = 1000
 
-
-def _auth_and_body(request):
-    """Returns (user_id, body, error_response)."""
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return None, None, JsonResponse({'error': 'Unauthorized'}, status=401)
-    try:
-        body = json.loads(request.body)
-        if not isinstance(body, dict):
-            raise ValueError
-    except Exception:
-        return None, None, JsonResponse({'error': 'Invalid JSON'}, status=400)
-    return user_id, body, None
-
-
-@csrf_exempt
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  
 def chat(request):
-    user_id, body, error = _auth_and_body(request)
-    if error:
-        return error
-
-    message = body.get('message')
+    # DRF extracts request.user directly from the token behind the scenes
+    user_id = request.user.id 
+    
+    # DRF already parsed the JSON into a clean Python dictionary
+    message = request.data.get('message')
+    
     if not isinstance(message, str) or not message.strip():
-        return JsonResponse({'error': 'Please type a message.'}, status=400)
+        return Response({'error': 'Please type a message.'}, status=status.HTTP_400_BAD_REQUEST)
     if len(message) > MAX_MESSAGE:
-        return JsonResponse({'error': f'Messages can be at most {MAX_MESSAGE} characters.'}, status=400)
+        return Response({'error': f'Messages can be at most {MAX_MESSAGE} characters.'}, status=status.HTTP_400_BAD_REQUEST)
 
     llm = get_llm()
     if llm is None:
-        return JsonResponse({'error': 'The assistant is not set up on this server yet.'}, status=503)
+        return Response({'error': 'The assistant is not set up on this server yet.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     try:
-        result = agent.run_chat(user_id, message.strip(), body.get('history'), llm)
+        # Pass the extracted user_id and history directly to your agent
+        result = agent.run_chat(user_id, message.strip(), request.data.get('history'), llm)
     except LLMError as e:
-        return JsonResponse({'error': str(e)}, status=502)
-    return JsonResponse(result)
+        print("LLM ERROR:", e)
+        return Response({'error': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        
+    return Response(result)
 
 
-@csrf_exempt
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated]) 
 def confirm(request):
-    user_id, body, error = _auth_and_body(request)
-    if error:
-        return error
-    token = body.get('token')
+    user_id = request.user.id
+    token = request.data.get('token')
+    
     if not isinstance(token, str) or not token:
-        return JsonResponse({'error': 'Missing confirmation token.'}, status=400)
-    return JsonResponse(agent.confirm_action(user_id, token, bool(body.get('approve'))))
+        return Response({'error': 'Missing confirmation token.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    result = agent.confirm_action(user_id, token, bool(request.data.get('approve')))
+    return Response(result)

@@ -8,20 +8,20 @@ from django.http import JsonResponse
 
 
 def get_role(user_id):
-    """Return 'admin', 'field_agent', or None when the user has no profile."""
+    """Return 'manager', 'field_agent', or None when the user has no profile."""
     from apps.fields.models import Profile
 
     profile = Profile.objects.filter(user_id=user_id).first()
     return profile.role if profile else None
 
 
-def is_admin(user_id):
-    return get_role(user_id) == 'admin'
+def is_manager(user_id):
+    return get_role(user_id) == 'manager'
 
 
 def can_access_field(user_id, field_id):
-    """Admins can see every field; everyone else only fields assigned to them."""
-    if is_admin(user_id):
+    """Managers can see every field; everyone else only fields assigned to them."""
+    if is_manager(user_id):
         return True
     from apps.fields.models import Field
 

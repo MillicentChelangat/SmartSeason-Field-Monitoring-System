@@ -2,9 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+from django.conf import settings
+
 class Profile(models.Model):
     ROLE_CHOICES = [
-        ('admin', 'Admin'),           
+        ('manager', 'Manager'),           
         ('field_agent', 'Field Agent'),
     ]
 
@@ -86,3 +88,30 @@ class FieldIssue(models.Model):
 
     def __str__(self):
         return f"{self.issue_type} on {self.field.name} ({self.severity})"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        open_issues = self.field.issues.exclude(status='resolved')
+        if not open_issues.exists():
+            self.field.status = 'healthy'
+        else:
+            has_high_severity = open_issues.filter(severity='high').exists()
+            if has_high_severity:
+                self.field.status = 'critical'
+            else:
+                self.field.status = 'at-risk'
+        
+        self.field.save()
+
+photo = models.ImageField(upload_to='issue_photos/', blank=True, null=True)
+
+class FieldIssueHistory(models.Model):
+    issue = models.ForeignKey(FieldIssue, on_delete=models.CASCADE, related_name='history')
+    old_status = models.CharField(max_length=50)
+    new_status = models.CharField(max_length=50)
+    changed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.issue.id}: {self.old_status} -> {self.new_status} by {self.changed_by}"
+    

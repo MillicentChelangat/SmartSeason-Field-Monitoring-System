@@ -7,20 +7,27 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-# Database
-db_url = os.getenv('DATABASE_URL_POOLED') or os.getenv('DATABASE_URL')
+# # Database
+# db_url = os.getenv('DATABASE_URL_POOLED') or os.getenv('DATABASE_URL')
+
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=db_url,
+#         conn_max_age=600,
+#         conn_health_checks=True,
+#         ssl_require=True
+#     )
+# }
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=db_url,
-        conn_max_age=600,
-        conn_health_checks=True,
-        ssl_require=True
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "https://smart-season-field-monitoring-syste-liard.vercel.app",
+    # "https://smart-season-field-monitoring-syste-liard.vercel.app",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]

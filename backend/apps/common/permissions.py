@@ -1,13 +1,13 @@
 from rest_framework.permissions import BasePermission
+# from apps.agent.views import 
 
-
-class IsAdmin(BasePermission):
-    """Allow access only to users with role='admin' in their Profile."""
+class IsManager(BasePermission):
+    """Allow access only to users with role='manager' in their Profile."""
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
         try:
-            return request.user.profile.role == 'admin'
+            return request.user.profile.role == 'manager'
         except Exception:
             return False
 

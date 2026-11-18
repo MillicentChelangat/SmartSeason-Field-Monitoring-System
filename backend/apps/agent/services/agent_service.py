@@ -1,26 +1,33 @@
-from rest_framework_simplejwt.tokens import AccessToken
-from apps.fields.models import Field, FieldUpdate
-
-
-def get_user_id_from_token(auth_header):
-    """Extract user_id from a Bearer token header. Returns None on failure."""
-    if not auth_header or not auth_header.startswith('Bearer '):
-        return None
-    try:
-        token = AccessToken(auth_header.split(' ')[1])
-        return int(token['user_id'])
-    except Exception:
-        return None
-
+from apps.fields.models import Field, FieldUpdate, FieldIssue
 
 def get_fields_for_agent(user_id):
-    return list(Field.objects.filter(assigned_agent_id=user_id).values(
-        'id', 'name', 'crop_type', 'planting_date',
-        'current_stage', 'location', 'assigned_agent_id', 'created_at'
-    ))
+    return Field.objects.filter(assigned_agent_id=user_id)
 
 
 def get_updates_for_agent(user_id):
-    return list(FieldUpdate.objects.filter(agent_id=user_id).order_by('-created_at').values(
-        'id', 'field_id', 'stage', 'notes', 'created_at', 'agent_id'
-    ))
+    return FieldUpdate.objects.filter(agent_id=user_id).order_by('-created_at')
+
+def add_field_update(field_id, stage, notes='', agent_id=None):
+    if not stage:
+        raise ValueError("Stage is required")
+    field = Field.objects.get(id=field_id)
+    field.current_stage = stage
+    field.save()
+    return FieldUpdate.objects.create(
+        field=field, agent_id=agent_id, stage=stage, notes=notes
+    )
+
+def report_issue(field_id, reported_by_id, issue_type, severity, description=''):
+    field = Field.objects.get(id=field_id)
+    issue = FieldIssue.objects.create(
+        field=field,
+        reported_by_id=reported_by_id,
+        issue_type=issue_type,
+        severity=severity,
+        description=description,
+    )
+    # Auto-update field status if severity is high
+    if severity == 'high':
+        field.current_stage = field.current_stage  
+        field.save()
+    return issue

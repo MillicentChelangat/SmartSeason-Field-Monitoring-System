@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.db.models import Max
 from django.utils import timezone
 
-from apps.common.access import can_access_field, get_role, is_admin
+from apps.common.access import can_access_field, get_role, is_manager
 from apps.fields.models import Field, FieldIssue, FieldUpdate, Profile
 from apps.fields.services import field_service
 from apps.fields.services.field_status import compute_field_status
@@ -26,7 +26,7 @@ ISSUE_TYPES = [c[0] for c in FieldIssue.ISSUE_TYPE_CHOICES]
 SEVERITIES = [c[0] for c in FieldIssue.SEVERITY_CHOICES]
 ISSUE_STATUSES = [c[0] for c in FieldIssue.STATUS_CHOICES]
 MAX_ROWS = 15
-MAX_TEXT = 200
+MAX_TEXT = 200         
 
 
 class ToolError(Exception):
@@ -36,8 +36,8 @@ class ToolError(Exception):
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def _scope(user_id):
-    """Plain queryset of the fields this user may see (admins: all, agents: assigned)."""
-    return Field.objects.all() if is_admin(user_id) else Field.objects.filter(assigned_agent_id=user_id)
+    """Plain queryset of the fields this user may see (managers: all, agents: assigned)."""
+    return Field.objects.all() if is_manager(user_id) else Field.objects.filter(assigned_agent_id=user_id)
 
 
 def _visible_fields(user_id):
@@ -129,7 +129,7 @@ def get_field_details(user_id, field_id):
     return row
 
 
-def find_stale_fields(user_id, days=7):
+def find_stale_fields(user_id, days=14):
     try:
         days = max(1, int(days))
     except (TypeError, ValueError):
@@ -192,16 +192,21 @@ def season_summary(user_id):
         by_status[r['status']] = by_status.get(r['status'], 0) + 1
     open_issues = FieldIssue.objects.filter(field__in=_scope(user_id)).exclude(status='resolved').count()
     stale = sum(1 for r in rows if r['stage'] != 'harvested'
-                and (r['days_since_update'] is None or r['days_since_update'] >= 7))
-    return {'total_fields': len(rows), 'by_stage': by_stage, 'by_status': by_status,
-            'open_issues': open_issues, 'fields_without_update_for_7_days': stale}
+                and (r['days_since_update'] is None or r['days_since_update'] >= 14))
+    return {
+        'total_fields': len(rows), 
+        'by_stage': by_stage, 
+        'by_status': by_status,
+        'open_issues': open_issues, 
+        'fields_without_update_for_14_days': stale}
 
 
 def list_agents(user_id):
     agents = field_service.get_all_agents()
-    if not is_admin(user_id):
+    if not is_manager(user_id):
         agents = [a for a in agents if a['user_id'] == user_id]
-    return {'agents': [{
+    return {
+        'agents': [{
         'user_id': a['user_id'], 'name': a['full_name'], 'residence': a['residence'],
         'fields': [f['name'] for f in a['fields']],
     } for a in agents]}
@@ -221,7 +226,7 @@ ADMIN_CANT_REPORT = ("Admins don't report issues, field agents do. "
 
 
 def report_issue(user_id, field_id, issue_type, severity, description=''):
-    if is_admin(user_id):
+    if is_manager(user_id):
         raise ToolError(ADMIN_CANT_REPORT)
     field = _get_field_or_error(user_id, field_id)
     _check_choice(issue_type, ISSUE_TYPES, 'issue_type')
@@ -231,8 +236,8 @@ def report_issue(user_id, field_id, issue_type, severity, description=''):
 
 
 def update_issue_status(user_id, issue_id, status):
-    if not is_admin(user_id):
-        raise ToolError('Only admins can change the status of an issue.')
+    if not is_manager(user_id):
+        raise ToolError('Only managers can change the status of an issue.')
     _check_choice(status, ISSUE_STATUSES, 'status')
     issue = _get_issue_or_error(issue_id)
     field_service.update_issue_status(issue.id, status)
@@ -240,8 +245,8 @@ def update_issue_status(user_id, issue_id, status):
 
 
 def assign_field(user_id, field_id, agent_id):
-    if not is_admin(user_id):
-        raise ToolError('Only admins can assign fields.')
+    if not is_manager(user_id):
+        raise ToolError('Only managers can assign fields.')
     field = _get_field_or_error(user_id, field_id)
     try:
         agent_id = int(agent_id)
@@ -284,7 +289,7 @@ TOOLS = [
          'Get one field with its recent updates (notes, pest/disease/irrigation flags) and issues.',
          _params({'field_id': _FIELD_ID}, ['field_id']), get_field_details),
     Tool('find_stale_fields',
-         'Find unharvested fields that have had no update for at least N days (default 7).',
+         'Find unharvested fields that have had no update for at least N days (default 14).',
          _params({'days': {'type': 'integer', 'description': 'Minimum days without an update.'}}),
          find_stale_fields),
     Tool('search_updates',

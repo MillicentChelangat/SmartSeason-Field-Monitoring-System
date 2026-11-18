@@ -1,53 +1,60 @@
-import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from operator import is_
+
+from django.db.migrations import serializer
+from django.db.models import ObjectDoesNotExist
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
 from apps.fields.services import auth_service, field_service
-from django.views.decorators.http import require_GET, require_http_methods
-from apps.agent.services.agent_service import get_user_id_from_token
 from apps.fields.models import Field, Profile
-from apps.common.access import get_role, is_admin, can_access_field, forbidden
+from apps.common.access import is_manager
+from apps.common.permissions import IsManager
+from apps.fields.serializers import ( LoginSerializer, ProfileSerializer, RegisterSerializer, 
+RegisterAgentSerializer, FieldSerializer, ProfileUpdateSerializer, FieldIssueSerializer, 
+FieldUpdateSerializer )
 
+MANAGER_ONLY = [IsAuthenticated, IsManager]
+FIELD_ACCESS = [IsAuthenticated]
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
-
-@csrf_exempt
-@require_http_methods(["POST"])  
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def register_api(request):
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    serializer = RegisterSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.validated_data
 
     try:
         user = auth_service.register_user(
-            email=data.get('email'),
-            password=data.get('password'),
-            full_name=data.get('full_name', ''),
-            role=data.get('role', 'field_agent'),
+            email=data['email'],
+            password=data['password'],
+            full_name=data['full_name'],
+            role='field_agent',   
         )
     except ValueError as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return Response({'error': str(e)}, status=400)
 
     tokens = auth_service.get_tokens(user)
-    return JsonResponse({'message': 'User created', 'tokens': tokens,
-                         'user': {'id': user.id, 'email': user.username}})
+    return Response({'message': 'User created', 'tokens': tokens,
+                     'user': {'id': user.id, 'email': user.username}})
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def login_api(request):
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    serializer = LoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.validated_data
 
     try:
-        user, profile = auth_service.login_user(data.get('email'), data.get('password'))
+        user, profile = auth_service.login_user(data['email'], data['password'])
     except ValueError as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return Response({'error': str(e)}, status=400)
 
     tokens = auth_service.get_tokens(user)
-    return JsonResponse({
+    return Response({
         'message': 'Login successful',
         'tokens': tokens,
         'user': {
@@ -61,18 +68,12 @@ def login_api(request):
     })
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@permission_classes(MANAGER_ONLY)
 def register_agent(request):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    if not is_admin(user_id):
-        return forbidden()
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    serializer = RegisterAgentSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.validated_data
     try:
         user = auth_service.register_agent(
             email=data.get('email'),
@@ -82,51 +83,35 @@ def register_agent(request):
             residence=data.get('residence', ''),
         )
     except ValueError as e:
-        return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'message': 'Agent registered', 'agent': {'id': user.id}}, status=201)
+        return Response({'error': str(e)}, status=400)
+    return Response({'message': 'Agent registered', 'agent': {'id': user.id}}, status=201)
 
 
-# ── Dashboard ─────────────────────────────────────────────────────────────────
-@csrf_exempt
+#Dashboard
+
+@api_view(['GET'])
 def dashboard(request):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    from django.contrib.auth.models import User
-    user = User.objects.filter(id=user_id).first()
-    if not user:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    data = field_service.get_dashboard_data(user)
-    return JsonResponse(data)
+    # request.user is already the User object (set by AgentTokenAuthentication)
+    return Response(field_service.get_dashboard_data(request.user))
 
 
-# ── Fields ────────────────────────────────────────────────────────────────────
-
-@csrf_exempt
-@require_GET
-def get_fields(request):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
+#Fields
+@api_view(['GET'])
+def get_fields(request):    
+    user_id = request.user.id
     fields = list(field_service.get_all_fields())
-    if not is_admin(user_id):
+    if not is_manager(user_id):
         fields = [f for f in fields if f['assigned_agent_id'] == user_id]
-    return JsonResponse(fields, safe=False)
+    return Response(fields) 
 
-
-# ── Profile ────────────────────────────────────────────────────────────────────
-
-@csrf_exempt
-@require_GET
+#Profile 
+@api_view(['GET'])
 def get_profile(request):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
+
     try:
-        from django.contrib.auth.models import User
-        u = User.objects.get(id=user_id)
+        u = request.user
         profile = Profile.objects.get(user=u)
-        return JsonResponse({
+        return Response({
             'full_name': profile.full_name,
             'email': u.username,
             'phone': profile.phone,
@@ -134,22 +119,16 @@ def get_profile(request):
             'role': profile.role,
         })
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return Response({'error': str(e)}, status=400)
 
 
-@csrf_exempt
-@require_http_methods(["PATCH"])
+@api_view(['PATCH'])
 def update_profile(request):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    serializer = ProfileUpdateSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.validated_data
     try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    try:
-        from django.contrib.auth.models import User
-        u = User.objects.get(id=user_id)
+        u = request.user
         profile = Profile.objects.get(user=u)
         if 'full_name' in data:
             profile.full_name = data['full_name']
@@ -160,43 +139,33 @@ def update_profile(request):
         profile.save()
         if data.get('new_password'):
             if not u.check_password(data.get('current_password', '')):
-                return JsonResponse({'error': 'Current password is incorrect'}, status=400)
+                return Response({'error': 'Current password is incorrect'}, status=400)
             u.set_password(data['new_password'])
             u.save()
-        return JsonResponse({'message': 'Profile updated'})
+        return Response({'message': 'Profile updated'})
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return Response({'error': str(e)}, status=400)
 
-@csrf_exempt
-@require_GET
+
+@api_view(['GET'])
+@permission_classes(FIELD_ACCESS)
 def get_field_detail(request, id):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
     try:
         id = int(id)
     except (ValueError, TypeError):
-        return JsonResponse({'error': 'Invalid ID'}, status=400)
-    if not can_access_field(user_id, id):
-        return forbidden()
+        return Response({'error': 'Invalid ID'}, status=400)
     field = field_service.get_field_by_id(id)
     if not field:
-        return JsonResponse({'error': 'Field not found'}, status=404)
-    return JsonResponse(field)
+        return Response({'error': 'Field not found'}, status=404)
+    return Response(field)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@permission_classes(MANAGER_ONLY)
 def create_field(request):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    if not is_admin(user_id):
-        return forbidden()
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    serializer = FieldSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)   
+    data = serializer.validated_data
     try:
         field = field_service.create_field(
             name=data.get('name'),
@@ -207,240 +176,131 @@ def create_field(request):
             assigned_agent_id=data.get('assigned_agent_id'),
         )
     except ValueError as e:
-        return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'message': 'Field created', 'field': {'id': field.id, 'name': field.name}}, status=201)
+        return Response({'error': str(e)}, status=400)
+    return Response({'message': 'Field created', 'field': {'id': field.id, 'name': field.name}}, status=201)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@permission_classes(MANAGER_ONLY)
 def assign_field(request, id):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    if not is_admin(user_id):
-        return forbidden()
     try:
         id = int(id)
     except (ValueError, TypeError):
-        return JsonResponse({'error': 'Invalid ID'}, status=400)
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return Response({'error': 'Invalid ID'}, status=400)
+    data = request.data
     try:
         field = field_service.assign_field(id, data.get('agent_id'))
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'message': 'Field assigned', 'field_id': field.id,
-                         'assigned_agent_id': field.assigned_agent_id})
+        return Response({'error': str(e)}, status=400)
+    return Response({'message': 'Field assigned', 'field_id': field.id,
+                     'assigned_agent_id': field.assigned_agent_id})
 
 
-@csrf_exempt
-@require_http_methods(["DELETE"])
+@api_view(['DELETE'])
+@permission_classes(MANAGER_ONLY)
 def delete_field(request, id):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    if not is_admin(user_id):
-        return forbidden()
     try:
         field_service.delete_field(id)
     except Exception:
-        return JsonResponse({'error': 'Field not found'}, status=404)
-    return JsonResponse({'message': 'Field deleted'})
+        return Response({'error': 'Field not found'}, status=404)
+    return Response({'message': 'Field deleted'})
 
 
-# ── Field updates ─────────────────────────────────────────────────────────────
+#Field updates
 
-@csrf_exempt
-@require_GET
+@api_view(['GET'])
 def get_field_updates(request):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    user_id = request.user.id
     updates = list(field_service.get_all_field_updates())
-    if not is_admin(user_id):
+    if not is_manager(user_id):
         mine = set(Field.objects.filter(assigned_agent_id=user_id).values_list('id', flat=True))
         updates = [u for u in updates if u['field_id'] in mine]
-    return JsonResponse(updates, safe=False)
-   
+    return Response(updates)
 
 
-@csrf_exempt
-@require_GET
+@api_view(['GET'])
+@permission_classes(FIELD_ACCESS)
 def get_field_updates_by_id(request, id):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
     try:
         id = int(id)
     except (ValueError, TypeError):
-        return JsonResponse({'error': 'Invalid ID'}, status=400)
-    if not can_access_field(user_id, id):
-        return forbidden()
-    return JsonResponse(list(field_service.get_updates_for_field(id)), safe=False)
+        return Response({'error': 'Invalid ID'}, status=400)
+    return Response(list(field_service.get_updates_for_field(id)))
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
-def add_field_update(request, id):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    try:
-        id = int(id)
-    except (ValueError, TypeError):
-        return JsonResponse({'error': 'Invalid ID'}, status=400)
-    if not can_access_field(user_id, id):
-        return forbidden()
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    try:
-        update = field_service.add_field_update(
-            field_id=id,
-            stage=data.get('stage'),
-            notes=data.get('notes', ''),
-            agent_id=data.get('agent_id') if is_admin(user_id) else user_id,
-        )
-    except ValueError as e:
-        return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'message': 'Update saved', 'update': {'id': update.id}}, status=201)
-
-@csrf_exempt
-@require_http_methods(["PATCH"])
+@api_view(['PATCH'])
+@permission_classes(MANAGER_ONLY)
 def update_field(request, id):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    if not is_admin(user_id):
-        return forbidden()
+    serializer = FieldSerializer(data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.validated_data
+
     try:
         id = int(id)
     except (ValueError, TypeError):
-        return JsonResponse({'error': 'Invalid ID'}, status=400)
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return Response({'error': 'Invalid ID'}, status=400)
+    data = request.data
     try:
         field = field_service.update_field(id, data)
     except Exception as e:
         if 'not found' in str(e).lower():
-            return JsonResponse({'error': 'Field not found'}, status=404)
-        return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'message': 'Field updated', 'field': {'id': field.id, 'name': field.name}})    
+            return Response({'error': 'Field not found'}, status=404)
+        return Response({'error': str(e)}, status=400)
+    return Response({'message': 'Field updated', 'field': {'id': field.id, 'name': field.name}})
 
 
-# ── Agents ────────────────────────────────────────────────────────────────────
-
-@csrf_exempt
-@require_GET
+#Agents 
+@api_view(['GET'])
 def get_agents(request):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    user_id = request.user.id
     agents = list(field_service.get_all_agents())
-    if not is_admin(user_id):
+    if not is_manager(user_id):
         agents = [a for a in agents if a['user_id'] == user_id]
-    return JsonResponse(agents, safe=False)
+    return Response(agents)
 
 
-@csrf_exempt
-@require_GET
+@api_view(['GET'])
+@permission_classes(FIELD_ACCESS)
 def get_field_agents(request, id):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
     try:
         id = int(id)
     except (ValueError, TypeError):
-        return JsonResponse({'error': 'Invalid ID'}, status=400)
-    if not can_access_field(user_id, id):
-        return forbidden()
-    return JsonResponse(list(field_service.get_agents_for_field(id)), safe=False)
+        return Response({'error': 'Invalid ID'}, status=400)
+    return Response(list(field_service.get_agents_for_field(id)))
 
 
-# ── Issues ────────────────────────────────────────────────────────────────────
-
-@csrf_exempt
-@require_GET
+#Issues
+@api_view(['GET'])
+@permission_classes(FIELD_ACCESS)
 def get_field_issues(request, id):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
     try:
         id = int(id)
     except (ValueError, TypeError):
-        return JsonResponse({'error': 'Invalid ID'}, status=400)
-    if not can_access_field(user_id, id):
-        return forbidden()
-    return JsonResponse(field_service.get_issues_for_field(id), safe=False)
+        return Response({'error': 'Invalid ID'}, status=400)
+    return Response(field_service.get_issues_for_field(id))
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
-def report_field_issue(request, id):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    if not can_access_field(user_id, id):
-        return forbidden()
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    try:
-        issue = field_service.report_issue(
-            field_id=id,
-            reported_by_id=user_id,
-            issue_type=data.get('issue_type'),
-            severity=data.get('severity', 'low'),
-            description=data.get('description', ''),
-        )
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'message': 'Issue reported', 'issue': {'id': issue.id}}, status=201)
-
-
-@csrf_exempt
-@require_GET
+@api_view(['GET'])
+@permission_classes(MANAGER_ONLY)
 def get_all_issues(request):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    if not is_admin(user_id):
-        return forbidden()
-    return JsonResponse(field_service.get_all_issues(), safe=False)
+    return Response(field_service.get_all_issues())
 
 
-@csrf_exempt
-@require_GET
+@api_view(['GET'])
+@permission_classes(MANAGER_ONLY)
 def get_issues_count(request):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    if not is_admin(user_id):
-        return forbidden()
-    count = field_service.get_open_issues_count()
-    return JsonResponse({'open_issues': count})
+    return Response({'open_issues': field_service.get_open_issues_count()})
 
 
-@csrf_exempt
-@require_http_methods(["PATCH"])
+@api_view(['PATCH'])
+@permission_classes(MANAGER_ONLY)
 def update_issue_status(request, id):
-    user_id = get_user_id_from_token(request.headers.get('Authorization', ''))
-    if not user_id:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    if not is_admin(user_id):
-        return forbidden()
+    data = request.data
     try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    try:
-        issue = field_service.update_issue_status(id, data.get('status'))
+        issue = field_service.update_issue_status(id, data.get('status'), changed_by=request.user)
+
+    except ObjectDoesNotExist:
+        return Response({'error': f'Issue with id {id} not found'}, status=404)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'message': 'Issue status updated', 'issue': {'id': issue.id, 'status': issue.status}})
+        return Response({'error': str(e)}, status=400)
+    return Response({'message': 'Issue status updated', 'issue': {'id': issue.id, 'status': issue.status}})

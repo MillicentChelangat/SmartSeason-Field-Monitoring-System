@@ -38,9 +38,9 @@ class PermissionTests(TestCase):
         self.assertEqual(data['role'], 'field_agent')
         self.assertEqual([f['name'] for f in data['fields']], ['Alice Plot'])
 
-    def test_dashboard_admin_sees_all_fields(self):
-        data = self.client.get('/api/dashboard/', **auth(self.admin)).json()
-        self.assertEqual(data['role'], 'admin')
+    def test_dashboard_manager_sees_all_fields(self):
+        data = self.client.get('/api/dashboard/', **auth(self.test_dashboard_manager_sees_all_fields)).json()
+        self.assertEqual(data['role'], 'manager')
         self.assertEqual(len(data['fields']), 2)
 
     # ── scoped reads ─────────────────────────────────────────────────────────
@@ -94,9 +94,9 @@ class PermissionTests(TestCase):
             '/api/admin/register-agent/', body, content_type='application/json',
             **auth(self.admin)).status_code, 201)
 
-    def test_issue_admin_endpoints_are_admin_only(self):
+    def test_issue_manager_endpoints_are_manager_only(self):
         self.assertEqual(self.client.get('/api/issues/', **auth(self.alice)).status_code, 403)
-        self.assertEqual(self.client.get('/api/issues/', **auth(self.admin)).status_code, 200)
+        self.assertEqual(self.client.get('/api/issues/', **auth(self.manager)).status_code, 200)
 
     # ── updates ──────────────────────────────────────────────────────────────
     def test_agent_cannot_update_someone_elses_field(self):

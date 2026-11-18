@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     'apps.agent',
     'apps.assistant',
     'apps.common',
+    
 ]
 
 MIDDLEWARE = [

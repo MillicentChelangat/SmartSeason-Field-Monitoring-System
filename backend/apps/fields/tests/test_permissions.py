@@ -124,3 +124,10 @@ class PermissionTests(TestCase):
                          **auth(self.bob))
         data = self.client.get('/api/field-updates/', **auth(self.alice)).json()
         self.assertEqual({u['field_id'] for u in data}, {self.alice_field.id})
+
+    def test_public_register_cannot_create_admin(self):
+        body = json.dumps({'email': 'x@test.com', 'password': 'pw-12345',
+                           'full_name': 'X', 'role': 'admin'})
+        res = self.client.post('/api/register/', body, content_type='application/json')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(Profile.objects.get(user__username='x@test.com').role, 'field_agent')        

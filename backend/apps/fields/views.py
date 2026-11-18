@@ -23,7 +23,7 @@ def register_api(request):
             email=data.get('email'),
             password=data.get('password'),
             full_name=data.get('full_name', ''),
-            role=data.get('role', 'field_agent'),
+            role= 'field_agent',
         )
     except ValueError as e:
         return JsonResponse({'error': str(e)}, status=400)
